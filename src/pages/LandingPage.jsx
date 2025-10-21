@@ -12,10 +12,20 @@ export default function LandingPage() {
   // Verificar si el tenant actual ya existe
   useEffect(() => {
     const checkIfTenantExists = async () => {
+      const hostname = window.location.hostname;
       const currentTenant = getTenantFromHostname();
       
-      // Si estamos en un tenant específico (no global-admin), verificar si existe
-      if (currentTenant && currentTenant !== 'global-admin') {
+      // Si estamos en el dominio raíz (psicoadmin.xyz), mostrar formulario de registro
+      const isRootDomain = hostname === 'psicoadmin.xyz' || hostname === 'www.psicoadmin.xyz';
+      
+      if (isRootDomain) {
+        console.log('Dominio raíz detectado - mostrando formulario de registro de clínicas');
+        setIsCheckingTenant(false);
+        return;
+      }
+      
+      // Si estamos en un subdominio de clínica (-app.psicoadmin.xyz), verificar si existe
+      if (hostname.includes('-app.psicoadmin.xyz') && currentTenant && currentTenant !== 'global-admin') {
         try {
           const response = await axios.post(`${API_BASE_URL}/check-subdomain/`, {
             subdomain: currentTenant
