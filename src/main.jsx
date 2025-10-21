@@ -27,7 +27,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage.jsx'; // <-- DASHBOAR
 import UserProfilePage from './pages/UserProfilePage.jsx'; // <-- PÁGINA DE PERFIL DE USUARIO
 import ProfessionalProfileDetailPage from './pages/ProfessionalProfileDetailPage.jsx'; // <-- PERFIL PROFESIONAL DETALLADO
 import PaymentSuccessPage from './pages/PaymentSuccessPage.jsx'; // <-- PÁGINA DE ÉXITO DE PAGO
-import LandingPage from './pages/LandingPage.jsx'; // <-- LANDING DE REGISTRO P�BLICO
+import LandingPage from './pages/LandingPage.jsx'; // <-- LANDING DE REGISTRO P�BLICO
 import PaymentCancelPage from './pages/PaymentCancelPage.jsx'; // <-- PÁGINA DE CANCELACIÓN DE PAGO
 import ClinicalHistoryPage from './pages/ClinicalHistoryPage.jsx'; // <-- PÁGINA DE HISTORIAL CLÍNICO
 import BackupsPage from './pages/BackupsPage.jsx'; // <-- PÁGINA DE COPIAS DE SEGURIDAD
@@ -35,6 +35,7 @@ import AuditLogPage from './pages/AuditLogPage.jsx'; // <-- PÁGINA DE BITÁCORA
 // Importaciones de Componentes
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import TenantInfo from './components/TenantInfo.jsx'; // <-- COMPONENTE MULTI-TENANT
+import Chatbot from './components/Chatbot.jsx'; // <-- CHATBOT INTELIGENTE
 import './index.css'; 
 
 // --- Clases de Botones (sin cambios) ---
@@ -276,6 +277,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           {/* Próximamente más funcionalidades de admin de clínica */}
         </Route>        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      
+      {/* Chatbot flotante - Disponible en todas las páginas */}
+      <Chatbot />
     </BrowserRouter>
   </React.StrictMode>,
 );
