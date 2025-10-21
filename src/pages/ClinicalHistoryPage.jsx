@@ -26,12 +26,12 @@ function ClinicalHistoryPage() {
                         patient: patientId,
                         consultation_reason: '',
                         history_of_illness: '',
-                        personal_history: '',
+                        personal_pathological_history: '',
                         family_history: '',
-                        diagnosis: '',
-                        treatment_plan: '',
+                        diagnoses: '',
+                        therapeutic_plan: '',
                         risk_assessment: '',
-                        observations: ''
+                        sensitive_topics: ''
                     });
                 } else {
                     setError('No se pudo cargar el historial clínico. Verifica tus permisos.');
@@ -155,8 +155,8 @@ function ClinicalHistoryPage() {
                                         Observaciones Generales
                                     </label>
                                     <textarea
-                                        name="observations"
-                                        value={history?.observations || ''}
+                                        name="sensitive_topics"
+                                        value={history?.sensitive_topics || ''}
                                         onChange={handleChange}
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         rows="3"
@@ -196,8 +196,8 @@ function ClinicalHistoryPage() {
                                         Antecedentes Personales
                                     </label>
                                     <textarea
-                                        name="personal_history"
-                                        value={history?.personal_history || ''}
+                                        name="personal_pathological_history"
+                                        value={history?.personal_pathological_history || ''}
                                         onChange={handleChange}
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         rows="5"
@@ -231,8 +231,8 @@ function ClinicalHistoryPage() {
                                         Diagnóstico Psicológico
                                     </label>
                                     <textarea
-                                        name="diagnosis"
-                                        value={history?.diagnosis || ''}
+                                        name="diagnoses"
+                                        value={history?.diagnoses || ''}
                                         onChange={handleChange}
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         rows="4"
@@ -245,8 +245,8 @@ function ClinicalHistoryPage() {
                                         Plan de Tratamiento
                                     </label>
                                     <textarea
-                                        name="treatment_plan"
-                                        value={history?.treatment_plan || ''}
+                                        name="therapeutic_plan"
+                                        value={history?.therapeutic_plan || ''}
                                         onChange={handleChange}
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         rows="6"
@@ -327,3 +327,4 @@ const TabButton = ({ name, activeTab, onClick, children }) => (
 );
 
 export default ClinicalHistoryPage;
+
