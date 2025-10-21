@@ -2,40 +2,94 @@
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import apiClient from '../api';
-import { isGlobalAdmin } from '../config/tenants';
-// import './Auth.css'; // <-- ¡Ya no se necesita!
+import { isGlobalAdmin, getApiBaseURL } from '../config/tenants';
 
 function LoginPage() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-     // src/pages/LoginPage.jsx
-
-    // ... (importaciones y estados) ...
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
         
         try {
-            // LÓGICA UNIFICADA: Siempre usamos apiClient para el login.
-            // La URL base correcta (localhost o subdominio) ya la configura tenants.js.
-            const loginResponse = await apiClient.post('/auth/login/', formData);
+            const hostname = window.location.hostname;
+            const isRootDomain = hostname === 'psicoadmin.xyz' || 
+                                hostname === 'www.psicoadmin.xyz';
             
-            // Guardamos el token que nos devuelve la API
+            // Detectar si es el admin global
+            const isGlobalAdminUser = formData.email === 'admin@psicoadmin.xyz';
+
+            console.log('🔍 Login Debug:', {
+                hostname,
+                isRootDomain,
+                isGlobalAdminUser,
+                email: formData.email
+            });
+
+            // Validación: Admin global debe estar en dominio raíz
+            if (isGlobalAdminUser && !isRootDomain) {
+                setError('⚠️ El admin general debe iniciar sesión en: https://psicoadmin.xyz/login');
+                setLoading(false);
+                setTimeout(() => {
+                    window.location.href = 'https://psicoadmin.xyz/login';
+                }, 2000);
+                return;
+            }
+
+            // Validación: Usuarios de clínica deben estar en su subdominio
+            if (!isGlobalAdminUser && isRootDomain && formData.email.includes('@')) {
+                const emailDomain = formData.email.split('@')[1];
+                if (emailDomain && emailDomain !== 'psicoadmin.xyz') {
+                    const clinicName = emailDomain.split('.')[0];
+                    setError(`⚠️ Debe iniciar sesión en: https://${clinicName}-app.psicoadmin.xyz/login`);
+                    setLoading(false);
+                    setTimeout(() => {
+                        window.location.href = `https://${clinicName}-app.psicoadmin.xyz/login`;
+                    }, 2000);
+                    return;
+                }
+            }
+
+            let loginResponse;
+
+            // Decisión: ¿Qué backend usar?
+            if (isRootDomain && isGlobalAdminUser) {
+                // Admin global → Backend público sin tenant
+                const publicApiUrl = 'https://psico-admin.onrender.com/api/auth/login/';
+                console.log('🌐 Admin global detectado - usando backend público:', publicApiUrl);
+                
+                loginResponse = await axios.post(publicApiUrl, formData, {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                });
+            } else {
+                // Usuario de clínica → Backend del tenant
+                const tenantApiUrl = getApiBaseURL() + '/auth/login/';
+                console.log('🏥 Usuario de clínica - usando backend tenant:', tenantApiUrl);
+                
+                loginResponse = await apiClient.post('/auth/login/', formData);
+            }
+            
+            console.log('✅ Login exitoso:', loginResponse.data);
+
+            // Guardamos el token
             localStorage.setItem('authToken', loginResponse.data.token);
             
-            // Obtenemos el tipo de usuario para saber a dónde redirigir
+            // Guardamos el tipo de usuario
             const userType = loginResponse.data.user.user_type;
             localStorage.setItem('userType', userType);
             
-            // Guardamos info básica del usuario para usarla en otros lugares (ej. chat)
+            // Guardamos info básica del usuario
             localStorage.setItem('currentUser', JSON.stringify({
                 id: loginResponse.data.user.id,
                 first_name: loginResponse.data.user.first_name
@@ -43,7 +97,6 @@ function LoginPage() {
 
             // Redirigimos según el tipo de usuario
             if (userType === 'admin' || userType === 'superuser') {
-                // isGlobalAdmin() nos dirá si es el dashboard global o de clínica
                 navigate(isGlobalAdmin() ? '/global-admin' : '/admin-dashboard');
             } else if (userType === 'professional') {
                 navigate('/psychologist-dashboard');
@@ -52,13 +105,14 @@ function LoginPage() {
             }
         
         } catch (err) {
-            console.error("Error en el login:", err);
+            console.error("❌ Error en el login:", err);
             if (err.response && err.response.data) {
-                // Muestra el error específico del backend si está disponible
                 setError(err.response.data.non_field_errors?.[0] || 'Credenciales incorrectas.');
             } else {
                 setError('Error de red o el servidor no responde.');
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -117,10 +171,11 @@ function LoginPage() {
                         />
                     </div>
                     <button 
-                        type="submit" 
-                        className="w-full p-3 bg-primary text-primary-foreground font-semibold rounded-lg shadow-md hover:bg-primary/90 transition-colors"
+                        type="submit"
+                        disabled={loading}
+                        className="w-full p-3 bg-primary text-primary-foreground font-semibold rounded-lg shadow-md hover:bg-primary/90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
-                        Entrar
+                        {loading ? 'Iniciando sesión...' : 'Entrar'}
                     </button>
                 </form>
                 
