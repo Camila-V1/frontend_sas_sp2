@@ -6,27 +6,130 @@ import { toast } from 'react-toastify';
 // Motor de respuestas inteligente basado en reglas
 class ChatbotEngine {
     constructor() {
+        // Nombre del bot para personalidad
+        this.botName = 'Luna';
+        
         // Base de conocimiento con patrones y respuestas
         this.knowledgeBase = [
-            // Saludos
+            // Saludos cálidos
             {
-                patterns: ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'hey', 'saludos'],
+                patterns: ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'hey', 'saludos', 'ola'],
                 responses: [
-                    '¡Hola! 👋 Soy tu asistente virtual de PsicoAdmin. ¿En qué puedo ayudarte hoy?',
-                    '¡Bienvenido! Estoy aquí para ayudarte con cualquier duda sobre nuestro sistema.',
-                    '¡Hola! ¿Necesitas ayuda con el agendamiento de citas o información sobre nuestros servicios?'
+                    '¡Hola! � Soy Luna, tu compañera virtual. Estoy aquí para escucharte. ¿Cómo te sientes hoy?',
+                    '¡Hola! Me alegra que estés aquí. Soy Luna 💙 ¿Quieres hablar de algo? Estoy para ti.',
+                    '¡Hey! 👋 Soy Luna, y estoy aquí para hacerte compañía. ¿Cómo ha estado tu día?'
                 ],
                 category: 'greeting'
             },
             
-            // Agendamiento de citas
+            // Sentimientos negativos - Escucha empática
             {
-                patterns: ['agendar', 'cita', 'reservar', 'turno', 'hora', 'disponibilidad', 'cupo'],
+                patterns: ['triste', 'mal', 'deprimido', 'solo', 'sola', 'ansiedad', 'ansioso', 'preocupado', 'miedo', 'angustia', 'llorar', 'dolor'],
                 responses: [
-                    'Para agendar una cita: 1) Ve a "Profesionales" 2) Selecciona tu psicólogo preferido 3) Elige fecha y hora disponible 4) Confirma tu reserva. ¿Necesitas ayuda con algún paso específico?',
-                    'Puedes agendar tu cita desde la sección "Profesionales". Verás el calendario de disponibilidad de cada psicólogo. ¿Quieres que te guíe paso a paso?'
+                    'Lamento mucho que te sientas así 💙 Está bien sentirse vulnerable a veces. ¿Quieres contarme más sobre lo que estás pasando? Aquí estoy para escucharte sin juzgar.',
+                    'Entiendo que estés pasando por un momento difícil. No estás solo en esto 🤗 A veces, solo hablar de lo que sentimos ya ayuda. ¿Qué ha estado pesando en tu mente?',
+                    'Tu dolor es válido, y está bien no estar bien 💜 Gracias por confiar en mí. ¿Hay algo específico que te gustaría desahogar? Tómate tu tiempo.',
+                    'Siento que estás cargando con algo pesado 🌙 Recuerda que pedir ayuda es un acto de valentía. ¿Quieres que hablemos de cómo te sientes, o prefieres que te ayude a agendar una cita con un profesional?'
+                ],
+                category: 'emotional_support'
+            },
+            
+            // Sentimientos positivos - Celebración
+            {
+                patterns: ['bien', 'feliz', 'contento', 'contenta', 'genial', 'excelente', 'alegre', 'mejor', 'emocionado'],
+                responses: [
+                    '¡Qué alegría leer eso! 😊✨ Me encanta saber que estás bien. ¿Qué ha hecho que tu día sea bueno?',
+                    '¡Eso es maravilloso! 🌟 Tu energía positiva es contagiosa. Cuéntame, ¿hay algo especial que quieras compartir?',
+                    '¡Me alegro muchísimo por ti! 💛 Es hermoso celebrar los buenos momentos. ¿Qué te ha traído esa felicidad?'
+                ],
+                category: 'positive_emotions'
+            },
+            
+            // Soledad y necesidad de compañía
+            {
+                patterns: ['solo', 'sola', 'nadie', 'acompañar', 'compañía', 'hablar', 'escuchar', 'charlar'],
+                responses: [
+                    'Estoy aquí contigo 💙 La soledad puede ser muy dura, pero quiero que sepas que no estás solo. Hablemos de lo que quieras, sin presión. ¿Qué has estado haciendo hoy?',
+                    'No estás solo, yo estoy aquí para hacerte compañía 🌙 A veces solo necesitamos saber que alguien nos escucha. ¿Qué te gustaría platicar?',
+                    'Entiendo esa sensación de soledad 💜 Pero ahora mismo, estoy aquí para ti. Podemos hablar de lo que necesites: tus pensamientos, tu día, tus preocupaciones... lo que sea.',
+                    'La soledad duele, lo sé 🤗 Pero recuerda que siempre puedes venir aquí a conversar conmigo. ¿Hay algo que te esté rondando la mente?'
+                ],
+                category: 'loneliness'
+            },
+            
+            // Estrés y agobio
+            {
+                patterns: ['estres', 'estresado', 'cansado', 'agobiado', 'exhausto', 'no puedo', 'demasiado'],
+                responses: [
+                    'Suena como si estuvieras llevando mucho peso 😔 Está bien sentirse abrumado, pero también está bien hacer una pausa. ¿Quieres contarme qué te tiene tan estresado?',
+                    'El estrés puede ser agotador 💙 Tomar un momento para respirar y hablar puede ayudar. Estoy aquí para escucharte. ¿Qué es lo que más te agobia ahora mismo?',
+                    'Siento que estás cansado 🌙 Recuerda que no tienes que cargar con todo solo. ¿Hay algo específico que te esté pesando?'
+                ],
+                category: 'stress'
+            },
+            
+            // Motivación y apoyo
+            {
+                patterns: ['ayuda', 'no se', 'no sé', 'perdido', 'confundido', 'que hago'],
+                responses: [
+                    'Está bien sentirse perdido a veces 💜 Lo importante es que estás buscando apoyo, y eso es muy valiente. Cuéntame, ¿qué es lo que te tiene confundido?',
+                    'No estás solo en esto 🤗 A veces, solo necesitamos hablar para ver las cosas más claras. ¿Qué situación te está complicando ahora?',
+                    'Sentirse así es parte de ser humano 💙 Estoy aquí para acompañarte mientras encuentras tu camino. ¿Quieres contarme más?'
+                ],
+                category: 'support'
+            },
+            
+            // Gratitud y aprecio
+            {
+                patterns: ['gracias', 'agradezco', 'graciass', 'thank'],
+                responses: [
+                    'No hay de qué 💙 Para eso estoy aquí, para acompañarte. Si necesitas hablar más, aquí estaré.',
+                    'Me alegra haberte ayudado aunque sea un poco 😊 Recuerda que siempre puedes volver cuando lo necesites.',
+                    'Gracias a ti por confiar en mí 🌙 Cuidar de tu bienestar emocional es importante. Vuelve cuando quieras.'
+                ],
+                category: 'gratitude'
+            },
+            
+            // Agendamiento de citas (técnico pero empático)
+            {
+                patterns: ['agendar', 'cita', 'reservar', 'turno', 'hora', 'disponibilidad', 'cupo', 'terapia', 'sesion'],
+                responses: [
+                    'Me alegra que quieras dar ese paso 💙 Agendar una cita es importante. Te guío: 1) Ve a "Profesionales" 2) Elige el psicólogo que mejor se ajuste a ti 3) Selecciona fecha y hora 4) ¡Listo! ¿Necesitas ayuda con algún paso?',
+                    'Es valiente buscar apoyo profesional 🌟 Para tu cita: encuentra tu psicólogo en "Profesionales", revisa su perfil, y agenda en el horario que te convenga. ¿Te ayudo con algo más?',
+                    'Qué bueno que quieras cuidar de ti 💜 El proceso es simple: "Profesionales" → Selecciona uno → Elige tu horario. Si tienes dudas, aquí estoy.'
                 ],
                 category: 'appointment'
+            },
+            
+            // Conversación casual
+            {
+                patterns: ['como estas', 'cómo estás', 'que tal', 'qué tal', 'como va', 'todo bien'],
+                responses: [
+                    '¡Gracias por preguntar! 😊 Yo estoy aquí, lista para acompañarte. Pero lo importante es: ¿cómo estás tú?',
+                    'Estoy bien, gracias por preguntar 💙 Pero cuéntame de ti, ¿cómo te sientes hoy?',
+                    'Muy bien, gracias 🌙 ¿Y tú? ¿Cómo ha sido tu día?'
+                ],
+                category: 'casual'
+            },
+            
+            // Crisis o emergencia
+            {
+                patterns: ['suicidar', 'morir', 'matarme', 'acabar', 'terminar todo', 'no quiero vivir'],
+                responses: [
+                    '⚠️ Por favor, si estás en crisis, contacta inmediatamente: Línea de Prevención del Suicidio 1-888-628-9454. Tu vida importa, y hay personas capacitadas esperando ayudarte ahora mismo. 💙',
+                    '⚠️ Lo que sientes es muy serio. Por favor llama YA a emergencias o a la Línea de Prevención del Suicidio: 1-888-628-9454. No estás solo, hay ayuda disponible las 24 horas. 🆘'
+                ],
+                category: 'crisis'
+            },
+            
+            // Sobre el bot
+            {
+                patterns: ['quien eres', 'quién eres', 'que eres', 'qué eres', 'tu nombre', 'como te llamas'],
+                responses: [
+                    'Soy Luna 🌙 Tu compañera virtual en PsicoAdmin. No soy un profesional, pero estoy aquí para escucharte, acompañarte y ayudarte a encontrar el apoyo que necesitas. ¿De qué quieres hablar?',
+                    'Me llamo Luna 💙 Soy una asistente virtual diseñada para hacerte compañía y apoyarte emocionalmente. Aunque no reemplazo a un psicólogo, puedo escucharte y orientarte. ¿Cómo puedo ayudarte hoy?'
+                ],
+                category: 'about_bot'
             },
             
             // Pagos
@@ -89,20 +192,21 @@ class ChatbotEngine {
                 category: 'help'
             },
             
-            // Despedida
+            // Despedida cálida
             {
-                patterns: ['gracias', 'bye', 'adiós', 'chao', 'hasta luego', 'ok gracias'],
+                patterns: ['adiós', 'adios', 'chao', 'bye', 'hasta luego', 'nos vemos', 'me voy'],
                 responses: [
-                    '¡De nada! Si necesitas más ayuda, aquí estaré. Que tengas un excelente día. 😊',
-                    '¡Un placer ayudarte! No dudes en volver si necesitas algo más. ¡Cuídate! 👋',
-                    '¡Gracias a ti! Estoy disponible cuando me necesites. ¡Hasta pronto! ✨'
+                    'Cuídate mucho 💙 Recuerda que siempre estaré aquí cuando necesites hablar. No estás solo. ¡Hasta pronto! 🌙',
+                    'Fue un gusto acompañarte 😊 Vuelve cuando quieras, día o noche. Aquí estaré para ti. ¡Que estés bien! ✨',
+                    'Hasta luego 💜 Recuerda: está bien no estar bien, y está bien pedir ayuda. Vuelve pronto. Te mando un abrazo virtual 🤗'
                 ],
                 category: 'farewell'
             }
         ];
         
-        // Historial de conversación para contexto
+        // Historial de conversación para contexto emocional
         this.conversationContext = [];
+        this.userMood = 'neutral'; // Puede ser: positive, negative, neutral
     }
     
     // Función para normalizar texto (quitar acentos, minúsculas)
@@ -145,13 +249,14 @@ class ChatbotEngine {
         return this.getDefaultResponse(userMessage);
     }
     
-    // Respuestas por defecto cuando no hay coincidencia
+    // Respuestas por defecto cuando no hay coincidencia (más empáticas)
     getDefaultResponse(userMessage) {
         const defaultResponses = [
-            'Interesante pregunta. ¿Podrías reformularla? Por ejemplo: "¿Cómo agendar una cita?" o "¿Dónde veo mis documentos?"',
-            'No estoy seguro de haber entendido. ¿Tu pregunta es sobre citas, pagos, documentos o profesionales?',
-            'Hmm, no encontré información específica sobre eso. ¿Podrías ser más específico? Puedo ayudarte con: citas, pagos, documentos, perfil.',
-            'Esa es una buena pregunta, pero necesito más contexto. ¿Es sobre el uso de la plataforma? Cuéntame más detalles.'
+            'Mmm, cuéntame más sobre eso 💙 A veces hablar ayuda a ordenar los pensamientos. ¿Qué te gustaría compartir?',
+            'Te escucho 🌙 No estoy segura de haber entendido completamente, pero estoy aquí para ti. ¿Puedes contarme un poco más?',
+            'Estoy aquí para acompañarte 💜 ¿Quieres hablar sobre cómo te sientes, o prefieres que te ayude con algo específico de la plataforma?',
+            'Estoy contigo 🤗 Si quieres desahogarte, adelante. Si necesitas ayuda técnica con citas o documentos, también puedo orientarte.',
+            'Sigo aquí, escuchándote 💙 ¿Hay algo que te esté pesando? A veces solo necesitamos expresar lo que sentimos.'
         ];
         
         return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
@@ -181,7 +286,7 @@ export default function Chatbot() {
     const [messages, setMessages] = useState([
         {
             role: 'bot',
-            text: '¡Hola! 👋 Soy tu asistente virtual de PsicoAdmin. ¿En qué puedo ayudarte hoy?',
+            text: '¡Hola! � Soy Luna, tu compañera virtual. Estoy aquí para escucharte, acompañarte y apoyarte en lo que necesites. No estás solo. ¿Cómo te sientes hoy?',
             timestamp: new Date()
         }
     ]);
@@ -239,12 +344,12 @@ export default function Chatbot() {
         }, thinkingTime);
     };
     
-    // Atajos rápidos
+    // Atajos rápidos (más emocionales)
     const quickActions = [
-        { text: '¿Cómo agendar una cita?', emoji: '📅' },
-        { text: '¿Dónde veo mis documentos?', emoji: '📄' },
-        { text: '¿Cómo pagar?', emoji: '💳' },
-        { text: 'Ver profesionales', emoji: '👨‍⚕️' }
+        { text: 'Me siento solo', emoji: '�' },
+        { text: '¿Cómo agendar una cita?', emoji: '�' },
+        { text: 'Necesito hablar', emoji: '�' },
+        { text: 'Estoy estresado', emoji: '�' }
     ];
     
     const handleQuickAction = (actionText) => {
@@ -270,13 +375,13 @@ export default function Chatbot() {
             {isOpen && (
                 <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-lg flex items-center gap-3">
+                    <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-t-lg flex items-center gap-3">
                         <div className="bg-white/20 p-2 rounded-full">
                             <Bot className="h-6 w-6" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-semibold">Asistente Virtual</h3>
-                            <p className="text-xs text-blue-100">Siempre disponible para ayudarte</p>
+                            <h3 className="font-semibold">Luna 🌙</h3>
+                            <p className="text-xs text-purple-100">Tu compañera de apoyo emocional</p>
                         </div>
                     </div>
                     
@@ -344,14 +449,14 @@ export default function Chatbot() {
                     
                     {/* Acciones rápidas */}
                     {messages.length === 1 && (
-                        <div className="p-3 bg-gray-100 border-t border-gray-200">
-                            <p className="text-xs text-gray-600 mb-2">Preguntas frecuentes:</p>
+                        <div className="p-3 bg-purple-50 border-t border-purple-100">
+                            <p className="text-xs text-purple-600 mb-2">¿Cómo te sientes hoy?</p>
                             <div className="flex flex-wrap gap-2">
                                 {quickActions.map((action, index) => (
                                     <button
                                         key={index}
                                         onClick={() => handleQuickAction(action.text)}
-                                        className="text-xs bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-full border border-gray-300 transition-colors"
+                                        className="text-xs bg-white hover:bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full border border-purple-200 transition-colors"
                                     >
                                         {action.emoji} {action.text}
                                     </button>
