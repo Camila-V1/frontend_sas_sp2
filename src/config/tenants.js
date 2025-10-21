@@ -1,9 +1,9 @@
-// src/config/tenants.js
+﻿// src/config/tenants.js
 
-// Configuración de tenants (simplificada - NO depende del hostname exacto)
+// ConfiguraciÃ³n de tenants (simplificada - NO depende del hostname exacto)
 export const TENANT_CONFIG = {
     bienestar: {
-        name: 'Clínica Bienestar',
+        name: 'ClÃ­nica Bienestar',
         theme: 'bienestar',
         logo: '/logos/bienestar.png',
         colors: {
@@ -12,7 +12,7 @@ export const TENANT_CONFIG = {
         }
     },
     mindcare: {
-        name: 'MindCare Psicología',
+        name: 'MindCare PsicologÃ­a',
         theme: 'mindcare',
         logo: '/logos/mindcare.png',
         colors: {
@@ -32,15 +32,15 @@ export const TENANT_CONFIG = {
     }
 };
 
-// Función para detectar tenant desde el hostname
+// FunciÃ³n para detectar tenant desde el hostname
 export const getTenantFromHostname = () => {
     const hostname = window.location.hostname;
     
     // Detectar tenant desde el subdomain
     // Ejemplos:
-    // - bienestar-app.psicoadmin.xyz → bienestar
-    // - mindcare-app.psicoadmin.xyz → mindcare
-    // - psico-app.vercel.app → bienestar (default)
+    // - bienestar-app.psicoadmin.xyz â†’ bienestar
+    // - mindcare-app.psicoadmin.xyz â†’ mindcare
+    // - psico-app.vercel.app â†’ bienestar (default)
     
     if (hostname.includes('mindcare')) {
         return 'mindcare';
@@ -61,16 +61,16 @@ export const getTenantFromHostname = () => {
     return 'bienestar';
 };
 
-// Función para obtener la configuración del tenant actual
+// FunciÃ³n para obtener la configuraciÃ³n del tenant actual
 export const getCurrentTenant = () => {
     const tenant = getTenantFromHostname();
     return TENANT_CONFIG[tenant] || TENANT_CONFIG.bienestar;
 };
 
-// Función helper más descriptiva (alias de getCurrentTenant)
+// FunciÃ³n helper mÃ¡s descriptiva (alias de getCurrentTenant)
 export const getCurrentTenantConfig = getCurrentTenant;
 
-// Función para obtener la URL base de la API (construcción dinámica según tenant)
+// FunciÃ³n para obtener la URL base de la API (construcciÃ³n dinÃ¡mica segÃºn tenant)
 export const getApiBaseURL = () => {
     const tenant = getTenantFromHostname();
     const hostname = window.location.hostname;
@@ -85,18 +85,24 @@ export const getApiBaseURL = () => {
         return `http://${tenant}.localhost:8000/api`;
     }
     
-    // Producción: construcción automática según tenant
+    // Produccion: quitar -app del hostname si existe
+    // bienestar-app.psicoadmin.xyz -> bienestar.psicoadmin.xyz
+    if (hostname.includes('-app.psicoadmin.xyz')) {
+        const backendHost = hostname.replace('-app', '');
+        return `https://${backendHost}/api`;
+    }
+    
     return `https://${tenant}.psicoadmin.xyz/api`;
 };
 
 
-// Función para verificar si estamos en modo admin global
+// FunciÃ³n para verificar si estamos en modo admin global
 export const isGlobalAdmin = () => {
     const tenant = getTenantFromHostname();
     return tenant === 'global-admin';
 };
 
-// Función para verificar si estamos en modo multi-tenant (clínica específica)
+// FunciÃ³n para verificar si estamos en modo multi-tenant (clÃ­nica especÃ­fica)
 export const isMultiTenant = () => {
     const tenant = getTenantFromHostname();
     return tenant !== 'global-admin';
