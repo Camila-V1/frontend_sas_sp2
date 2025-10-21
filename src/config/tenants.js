@@ -1,9 +1,9 @@
 ﻿// src/config/tenants.js
 
-// ConfiguraciÃ³n de tenants (simplificada - NO depende del hostname exacto)
+// Configuración de tenants (simplificada - NO depende del hostname exacto)
 export const TENANT_CONFIG = {
     bienestar: {
-        name: 'ClÃ­nica Bienestar',
+        name: 'Clínica Bienestar',
         theme: 'bienestar',
         logo: '/logos/bienestar.png',
         colors: {
@@ -12,7 +12,7 @@ export const TENANT_CONFIG = {
         }
     },
     mindcare: {
-        name: 'MindCare PsicologÃ­a',
+        name: 'MindCare Psicología',
         theme: 'mindcare',
         logo: '/logos/mindcare.png',
         colors: {
@@ -32,78 +32,105 @@ export const TENANT_CONFIG = {
     }
 };
 
-// FunciÃ³n para detectar tenant desde el hostname
+//  FUNCIÓN CORREGIDA: Detectar tenant desde el hostname
 export const getTenantFromHostname = () => {
     const hostname = window.location.hostname;
-    
-    // Detectar tenant desde el subdomain
+
+    //  DOMINIO RAÍZ = Admin Global (NO es un tenant específico)
+    if (hostname === 'psicoadmin.xyz' || 
+        hostname === 'www.psicoadmin.xyz' || 
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1') {
+        return null; //  NO hay tenant, es dominio raíz
+    }
+
+    //  Detectar tenant desde subdomain con -app
     // Ejemplos:
-    // - bienestar-app.psicoadmin.xyz â†’ bienestar
-    // - mindcare-app.psicoadmin.xyz â†’ mindcare
-    // - psico-app.vercel.app â†’ bienestar (default)
-    
-    if (hostname.includes('mindcare')) {
-        return 'mindcare';
-    } else if (hostname.includes('bienestar')) {
-        return 'bienestar';
+    // - bienestar-app.psicoadmin.xyz  bienestar
+    // - mindcare-app.psicoadmin.xyz  mindcare
+    if (hostname.includes('-app.psicoadmin.xyz')) {
+        if (hostname.includes('mindcare')) return 'mindcare';
+        if (hostname.includes('bienestar')) return 'bienestar';
     }
-    
-    // Desarrollo local
+
+    //  Detectar tenant desde subdomain directo (backend)
+    // - bienestar.psicoadmin.xyz  bienestar
+    // - mindcare.psicoadmin.xyz  mindcare
+    if (hostname.includes('.psicoadmin.xyz')) {
+        if (hostname.startsWith('mindcare.')) return 'mindcare';
+        if (hostname.startsWith('bienestar.')) return 'bienestar';
+    }
+
+    //  Desarrollo local con subdominios
     if (hostname.includes('localhost')) {
-        const subdomain = hostname.split('.')[0];
-        if (subdomain === 'mindcare') return 'mindcare';
-        if (subdomain === 'bienestar') return 'bienestar';
-        if (subdomain === 'localhost') return 'global-admin'; // localhost puro = admin global
-        return 'bienestar'; // Default
+        const parts = hostname.split('.');
+        if (parts.length > 1) {
+            const subdomain = parts[0];
+            if (subdomain === 'mindcare') return 'mindcare';
+            if (subdomain === 'bienestar') return 'bienestar';
+        }
     }
-    
-    // Default para cualquier otro caso
-    return 'bienestar';
+
+    //  Vercel deployments
+    if (hostname.includes('vercel.app')) {
+        // Detectar por URL completa si tiene tenant en el nombre
+        if (hostname.includes('mindcare')) return 'mindcare';
+        if (hostname.includes('bienestar')) return 'bienestar';
+        return 'bienestar'; // Default para Vercel
+    }
+
+    //  Si llegamos aquí, NO hay tenant (dominio raíz o desconocido)
+    return null;
 };
 
-// FunciÃ³n para obtener la configuraciÃ³n del tenant actual
+// Función para obtener la configuración del tenant actual
 export const getCurrentTenant = () => {
     const tenant = getTenantFromHostname();
+    if (!tenant) return null; //  Dominio raíz, no hay tenant
     return TENANT_CONFIG[tenant] || TENANT_CONFIG.bienestar;
 };
 
-// FunciÃ³n helper mÃ¡s descriptiva (alias de getCurrentTenant)
+// Función helper más descriptiva (alias de getCurrentTenant)
 export const getCurrentTenantConfig = getCurrentTenant;
 
-// FunciÃ³n para obtener la URL base de la API (construcciÃ³n dinÃ¡mica segÃºn tenant)
+// Función para obtener la URL base de la API (construcción dinámica según tenant)
 export const getApiBaseURL = () => {
     const tenant = getTenantFromHostname();
     const hostname = window.location.hostname;
+
+    //  Dominio raíz  Backend público
+    if (!tenant) {
+        if (hostname.includes('localhost')) {
+            return 'http://localhost:8000/api';
+        }
+        return 'https://psico-admin.onrender.com/api';
+    }
+
+    //  Tenant específico  Backend del tenant
     
     // Desarrollo local
     if (hostname.includes('localhost')) {
-        // Admin global usa localhost sin subdomain
-        if (tenant === 'global-admin') {
-            return 'http://localhost:8000/api';
-        }
-        // Otros tenants usan subdomain
         return `http://${tenant}.localhost:8000/api`;
     }
-    
-    // Produccion: quitar -app del hostname si existe
+
+    // Producción: quitar -app del hostname si existe
     // bienestar-app.psicoadmin.xyz -> bienestar.psicoadmin.xyz
     if (hostname.includes('-app.psicoadmin.xyz')) {
         const backendHost = hostname.replace('-app', '');
         return `https://${backendHost}/api`;
     }
-    
+
     return `https://${tenant}.psicoadmin.xyz/api`;
 };
 
-
-// FunciÃ³n para verificar si estamos en modo admin global
+// Función para verificar si estamos en modo admin global
 export const isGlobalAdmin = () => {
     const tenant = getTenantFromHostname();
-    return tenant === 'global-admin';
+    return tenant === null || tenant === 'global-admin';
 };
 
-// FunciÃ³n para verificar si estamos en modo multi-tenant (clÃ­nica especÃ­fica)
+// Función para verificar si estamos en modo multi-tenant (clínica específica)
 export const isMultiTenant = () => {
     const tenant = getTenantFromHostname();
-    return tenant !== 'global-admin';
+    return tenant !== null && tenant !== 'global-admin';
 };
