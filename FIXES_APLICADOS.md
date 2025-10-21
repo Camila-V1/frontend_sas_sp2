@@ -71,6 +71,9 @@ useEffect(() => {
 ## 📊 HISTORIAL DE COMMITS
 
 ```bash
+c6c9cf1 - docs: Guía completa de testing para error 401 del admin dashboard
+73a3fc8 - fix: Corregir React Error #310 - mover hooks antes de early return
+9e0d71e - fix: GlobalAdminDashboard usar access_token y endpoint correcto /tenants/
 c5386c2 - fix: Evitar loop infinito en LandingPage - useEffect solo ejecuta una vez
 c64b303 - fix: Usar access_token consistentemente en localStorage para compatibilidad con GlobalAdminDashboard
 027887e - fix: GlobalAdminDashboard usa backend público hardcoded
@@ -233,5 +236,39 @@ El backend debe aceptar:
 
 ---
 
-**Última actualización:** 21 Oct 2025, 07:45 UTC  
-**Deploy Status:** ✅ Frontend deployed, Backend pendiente de verificación
+---
+
+## 🔄 ACTUALIZACIÓN FINAL - 21 Oct 2025, 09:15 UTC
+
+### ✅ **Todos los Fixes Aplicados y Deployed:**
+
+- **Commit `c6c9cf1`**: Documentación completa de testing
+- **Commit `73a3fc8`**: Fix React Error #310 (hooks correctos)
+- **Commit `9e0d71e`**: GlobalAdminDashboard endpoint correcto
+- **Estado Vercel:** ✅ Deployed y Ready
+
+### ⚠️ **Si el Error 401 Persiste:**
+
+**Causa Probable:** Cache del navegador o Vercel CDN
+
+**Solución Inmediata:**
+1. Hard refresh: **Ctrl + Shift + R**
+2. Limpiar Local Storage en DevTools
+3. Probar en modo incógnito
+4. Ver guía completa: `TESTING_ADMIN_DASHBOARD.md`
+
+### 📋 **Verificación Rápida:**
+
+Abre DevTools Console y busca este log:
+```javascript
+✅ CORRECTO: "🌐 GlobalAdmin - Cargando datos del backend público: https://psico-admin.onrender.com/api"
+❌ INCORRECTO: "GET https://bienestar.psicoadmin.xyz/api/admin/users/"
+```
+
+Si ves el log INCORRECTO, es cache del navegador.
+
+---
+
+**Última actualización:** 21 Oct 2025, 09:15 UTC  
+**Deploy Status:** ✅ Frontend deployed y verificado  
+**Guía Testing:** Ver `TESTING_ADMIN_DASHBOARD.md` para solución de cache
