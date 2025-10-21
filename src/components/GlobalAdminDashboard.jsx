@@ -1,4 +1,4 @@
-Ôªøimport { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function GlobalAdminDashboard() {
@@ -22,11 +22,11 @@ export default function GlobalAdminDashboard() {
         return;
       }
 
-      //  CR√çTICO: Admin general SIEMPRE usa el backend p√∫blico
-      // El endpoint /api/tenants/ devuelve la lista de cl√≠nicas
+      //  CRÕTICO: Admin general SIEMPRE usa el backend p˙blico
+      // El endpoint /api/tenants/ devuelve la lista de clÌnicas
       const apiUrl = 'https://psico-admin.onrender.com/api/tenants/';
       
-      console.log(' [GlobalAdminDashboard] Cargando cl√≠nicas desde:', apiUrl);
+      console.log(' [GlobalAdminDashboard] Cargando clÌnicas desde:', apiUrl);
       console.log(' [GlobalAdminDashboard] Token:', token.substring(0, 20) + '...');
 
       const response = await fetch(apiUrl, {
@@ -39,7 +39,7 @@ export default function GlobalAdminDashboard() {
       console.log(' [GlobalAdminDashboard] Response status:', response.status);
 
       if (response.status === 401) {
-        console.error(' Token inv√°lido o expirado');
+        console.error(' Token inv·lido o expirado');
         localStorage.removeItem('access_token');
         localStorage.removeItem('authToken');
         localStorage.removeItem('refresh_token');
@@ -53,18 +53,18 @@ export default function GlobalAdminDashboard() {
       }
 
       const data = await response.json();
-      console.log(' [GlobalAdminDashboard] Cl√≠nicas cargadas:', data);
+      console.log(' [GlobalAdminDashboard] ClÌnicas cargadas:', data);
       
-      // Si la respuesta es un array directamente, √∫salo
-      // Si viene en data.results, √∫salo
-      // Si viene en data.clinics, √∫salo
+      // Si la respuesta es un array directamente, ˙salo
+      // Si viene en data.results, ˙salo
+      // Si viene en data.clinics, ˙salo
       const clinicsData = Array.isArray(data) ? data : (data.results || data.clinics || []);
       
       setClinics(clinicsData);
       setLoading(false);
       
     } catch (err) {
-      console.error(' Error cargando cl√≠nicas:', err);
+      console.error(' Error cargando clÌnicas:', err);
       setError(err.message);
       setLoading(false);
     }
@@ -83,7 +83,7 @@ export default function GlobalAdminDashboard() {
       <div className='min-h-screen flex items-center justify-center bg-gray-50'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4'></div>
-          <p className='text-gray-600 text-lg'>Cargando panel de administraci√≥n...</p>
+          <p className='text-gray-600 text-lg'>Cargando panel de administraciÛn...</p>
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ export default function GlobalAdminDashboard() {
               onClick={handleLogout}
               className='flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors'
             >
-              Cerrar Sesi√≥n
+              Cerrar SesiÛn
             </button>
           </div>
         </div>
@@ -125,17 +125,17 @@ export default function GlobalAdminDashboard() {
           <div className='flex justify-between items-center py-6'>
             <div>
               <h1 className='text-3xl font-bold text-gray-900'>
-                 Panel de Administraci√≥n Global
+                 Panel de AdministraciÛn Global
               </h1>
               <p className='mt-1 text-sm text-gray-600'>
-                Gesti√≥n centralizada de todas las cl√≠nicas
+                GestiÛn centralizada de todas las clÌnicas
               </p>
             </div>
             <button
               onClick={handleLogout}
               className='bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors'
             >
-              Cerrar Sesi√≥n
+              Cerrar SesiÛn
             </button>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function GlobalAdminDashboard() {
               <div className='ml-5 w-0 flex-1'>
                 <dl>
                   <dt className='text-sm font-medium text-gray-500 truncate'>
-                    Cl√≠nicas Activas
+                    ClÌnicas Activas
                   </dt>
                   <dd className='text-3xl font-semibold text-gray-900'>
                     {clinics.length}
@@ -204,17 +204,17 @@ export default function GlobalAdminDashboard() {
         <div className='bg-white shadow rounded-lg'>
           <div className='px-6 py-4 border-b border-gray-200'>
             <h2 className='text-xl font-semibold text-gray-900'>
-              Cl√≠nicas Registradas
+              ClÌnicas Registradas
             </h2>
           </div>
           <div className='divide-y divide-gray-200'>
             {clinics.length === 0 ? (
               <div className='px-6 py-12 text-center'>
                 <p className='text-gray-500 text-lg mb-4'>
-                  No hay cl√≠nicas registradas a√∫n
+                  No hay clÌnicas registradas a˙n
                 </p>
                 <p className='text-gray-400 text-sm'>
-                  Las nuevas cl√≠nicas aparecer√°n aqu√≠ autom√°ticamente
+                  Las nuevas clÌnicas aparecer·n aquÌ autom·ticamente
                 </p>
               </div>
             ) : (
@@ -223,10 +223,10 @@ export default function GlobalAdminDashboard() {
                   <div className='flex items-center justify-between'>
                     <div className='flex-1'>
                       <h3 className='text-lg font-medium text-gray-900 mb-1'>
-                        {clinic.name}
+                        {clinic.name || clinic.schema_name || "Sin nombre"}
                       </h3>
                       <div className='flex items-center space-x-4 text-sm text-gray-500'>
-                        <span> Creada: {new Date(clinic.created_on).toLocaleDateString()}</span>
+                        <span> Creada: {(clinic.created_on ? new Date(clinic.created_on).toLocaleDateString() : "N/A")}</span>
                         <span> Schema: {clinic.schema_name}</span>
                         {clinic.primary_domain && (
                           <span> {clinic.primary_domain}</span>
@@ -263,3 +263,4 @@ export default function GlobalAdminDashboard() {
     </div>
   );
 }
+
