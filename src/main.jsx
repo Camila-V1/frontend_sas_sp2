@@ -1,4 +1,4 @@
-// src/main.jsx
+﻿// src/main.jsx
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate, Outlet } fro
 import { ToastContainer } from 'react-toastify'; // <-- CAMBIO: REACT-TOASTIFY EN LUGAR DE SONNER
 import 'react-toastify/dist/ReactToastify.css'; // <-- ESTILOS DE REACT-TOASTIFY
 
-// Importaciones de Páginas
+// Importaciones de PÃ¡ginas
 import App from './App.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -20,17 +20,18 @@ import PsychologistDashboard from './pages/PsychologistDashboard.jsx';
 import PsychologistAvailabilityPage from './pages/PsychologistAvailabilityPage.jsx';
 import PsychologistProfilePage from './pages/PsychologistProfilePage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
-import SessionNotePage from './pages/SessionNotePage.jsx'; // <-- NUEVA PÁGINA
-import DocumentsPage from './pages/DocumentsPage.jsx'; // <-- PÁGINA PARA PSICÓLOGOS
-import MyDocumentsPage from './pages/MyDocumentsPage.jsx'; // <-- PÁGINA PARA PACIENTES
-import AdminDashboardPage from './pages/AdminDashboardPage.jsx'; // <-- DASHBOARD ADMIN DINÁMICO
-import UserProfilePage from './pages/UserProfilePage.jsx'; // <-- PÁGINA DE PERFIL DE USUARIO
+import SessionNotePage from './pages/SessionNotePage.jsx'; // <-- NUEVA PÃGINA
+import DocumentsPage from './pages/DocumentsPage.jsx'; // <-- PÃGINA PARA PSICÃ“LOGOS
+import MyDocumentsPage from './pages/MyDocumentsPage.jsx'; // <-- PÃGINA PARA PACIENTES
+import AdminDashboardPage from './pages/AdminDashboardPage.jsx'; // <-- DASHBOARD ADMIN DINÃMICO
+import UserProfilePage from './pages/UserProfilePage.jsx'; // <-- PÃGINA DE PERFIL DE USUARIO
 import ProfessionalProfileDetailPage from './pages/ProfessionalProfileDetailPage.jsx'; // <-- PERFIL PROFESIONAL DETALLADO
-import PaymentSuccessPage from './pages/PaymentSuccessPage.jsx'; // <-- PÁGINA DE ÉXITO DE PAGO
-import PaymentCancelPage from './pages/PaymentCancelPage.jsx'; // <-- PÁGINA DE CANCELACIÓN DE PAGO
-import ClinicalHistoryPage from './pages/ClinicalHistoryPage.jsx'; // <-- PÁGINA DE HISTORIAL CLÍNICO
-import BackupsPage from './pages/BackupsPage.jsx'; // <-- PÁGINA DE COPIAS DE SEGURIDAD
-import AuditLogPage from './pages/AuditLogPage.jsx'; // <-- PÁGINA DE BITÁCORA
+import PaymentSuccessPage from './pages/PaymentSuccessPage.jsx'; // <-- PÃGINA DE Ã‰XITO DE PAGO
+import LandingPage from './pages/LandingPage.jsx'; // <-- LANDING DE REGISTRO PÚBLICO
+import PaymentCancelPage from './pages/PaymentCancelPage.jsx'; // <-- PÃGINA DE CANCELACIÃ“N DE PAGO
+import ClinicalHistoryPage from './pages/ClinicalHistoryPage.jsx'; // <-- PÃGINA DE HISTORIAL CLÃNICO
+import BackupsPage from './pages/BackupsPage.jsx'; // <-- PÃGINA DE COPIAS DE SEGURIDAD
+import AuditLogPage from './pages/AuditLogPage.jsx'; // <-- PÃGINA DE BITÃCORA
 // Importaciones de Componentes
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import TenantInfo from './components/TenantInfo.jsx'; // <-- COMPONENTE MULTI-TENANT
@@ -74,7 +75,7 @@ function DashboardLayout() {
                     <Link to="/my-appointments" className={navLink}>Mis Citas</Link>
                     <Link to="/my-documents" className={navLink}>Mis Documentos</Link>
                     <Link to="/profile" className={navLink}>Mi Perfil</Link>
-                    <button onClick={handleLogout} className={btnDestructive}>Cerrar Sesión</button>
+                    <button onClick={handleLogout} className={btnDestructive}>Cerrar SesiÃ³n</button>
                 </div>
             </nav>
             <div className="p-4 sm:p-8 bg-background min-h-screen">
@@ -85,7 +86,7 @@ function DashboardLayout() {
     );
 }
 
-// Layout para el Psicólogo
+// Layout para el PsicÃ³logo
 function PsychologistLayout() {
     const navigate = useNavigate();
     const handleLogout = () => {
@@ -116,7 +117,7 @@ function PsychologistLayout() {
                     <Link to="/documents" className={navLink}>Documentos</Link>
                     <Link to="/availability" className={navLink}>Disponibilidad</Link>
                     <Link to="/psychologist-profile" className={navLink}>Mi Perfil</Link>
-                    <button onClick={handleLogout} className={btnDestructive}>Cerrar Sesión</button>
+                    <button onClick={handleLogout} className={btnDestructive}>Cerrar SesiÃ³n</button>
                 </div>
             </nav>
             <div className="p-4 sm:p-8 bg-background min-h-screen">
@@ -152,12 +153,12 @@ function GlobalAdminLayout() {
                 theme="light"
             />
             <nav className="flex justify-between items-center p-4 px-8 bg-purple-800 text-white shadow-md">
-                <Link to="/global-admin" className="text-xl font-bold">🌐 Administrador General - Psico SAS</Link>
+                <Link to="/global-admin" className="text-xl font-bold">ðŸŒ Administrador General - Psico SAS</Link>
                 <div className="flex items-center gap-6">
-                    <Link to="/global-admin/clinics" className={navLink}>Clínicas</Link>
+                    <Link to="/global-admin/clinics" className={navLink}>ClÃ­nicas</Link>
                     <Link to="/global-admin/users" className={navLink}>Usuarios Globales</Link>
-                    <Link to="/global-admin/stats" className={navLink}>Estadísticas</Link>
-                    <button onClick={handleLogout} className={btnDestructive}>Cerrar Sesión</button>
+                    <Link to="/global-admin/stats" className={navLink}>EstadÃ­sticas</Link>
+                    <button onClick={handleLogout} className={btnDestructive}>Cerrar SesiÃ³n</button>
                 </div>
             </nav>
             <div className="p-8 bg-background min-h-screen">
@@ -168,7 +169,7 @@ function GlobalAdminLayout() {
     );
 }
 
-// Layout para el Administrador de la Clínica
+// Layout para el Administrador de la ClÃ­nica
 function AdminLayout() {
     const navigate = useNavigate();
     const handleLogout = () => {
@@ -195,9 +196,9 @@ function AdminLayout() {
                 <div className="flex items-center gap-6">
                     <Link to="/admin-dashboard" className={navLink}>Dashboard</Link>
                     <Link to="/admin-dashboard/backups" className={navLink}>Copias de Seguridad</Link>
-                    <Link to="/admin-dashboard/audit-log" className={navLink}>Bitácora</Link>
-                    {/* Enlaces futuros: Clínicas, Estadísticas, Configuración */}
-                    <button onClick={handleLogout} className={btnDestructive}>Cerrar Sesión</button>
+                    <Link to="/admin-dashboard/audit-log" className={navLink}>BitÃ¡cora</Link>
+                    {/* Enlaces futuros: ClÃ­nicas, EstadÃ­sticas, ConfiguraciÃ³n */}
+                    <button onClick={handleLogout} className={btnDestructive}>Cerrar SesiÃ³n</button>
                 </div>
             </nav>
             <div className="p-8 bg-background min-h-screen">
@@ -207,13 +208,13 @@ function AdminLayout() {
         </div>
     );
 }
-// --- PÁGINA DE INICIO (PÚBLICA) ---
+// --- PÃGINA DE INICIO (PÃšBLICA) ---
 function HomePage() {
     return (
         <div className="flex flex-col justify-center items-center min-h-screen p-8 bg-background">
             <h1 className="text-4xl font-bold text-primary mb-8">Bienvenido a Psico SAS</h1>
             <nav className="flex gap-4">
-                <Link to="/login" className={btnPrimary}>Iniciar Sesión</Link>
+                <Link to="/login" className={btnPrimary}>Iniciar SesiÃ³n</Link>
                 <Link to="/register" className={btnSecondary}>Registrarse</Link>
             </nav>
         </div>
@@ -226,8 +227,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         {/* ... (Todas tus rutas se quedan igual) ... */}
-        {/* --- Rutas Públicas --- */}
-        <Route path="/" element={<HomePage />} />
+        {/* --- Rutas PÃºblicas --- */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/reset-password" element={<PasswordResetRequestPage />} />
@@ -245,7 +247,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="chat/:appointmentId" element={<ChatPage />} />
         </Route>
         
-        {/* --- Rutas Protegidas para el Psicólogo --- */}
+        {/* --- Rutas Protegidas para el PsicÃ³logo --- */}
         <Route element={<ProtectedRoute userType="professional"><PsychologistLayout /></ProtectedRoute>}>
           <Route path="psychologist-dashboard" element={<PsychologistDashboard />} />
           <Route path="psychologist-availability" element={<PsychologistAvailabilityPage />} />
@@ -259,19 +261,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         {/* --- Rutas Protegidas para el Administrador Global (localhost) --- */}
         <Route element={<ProtectedRoute userType="admin"><GlobalAdminLayout /></ProtectedRoute>}>
           <Route path="global-admin" element={<AdminDashboardPage />} />
-          <Route path="global-admin/clinics" element={<h1 className="text-2xl font-bold text-purple-800">🏥 Gestión de Clínicas</h1>} />
-          <Route path="global-admin/users" element={<h1 className="text-2xl font-bold text-purple-800">👥 Usuarios Globales</h1>} />
-          <Route path="global-admin/stats" element={<h1 className="text-2xl font-bold text-purple-800">📊 Estadísticas Globales</h1>} />
+          <Route path="global-admin/clinics" element={<h1 className="text-2xl font-bold text-purple-800">ðŸ¥ GestiÃ³n de ClÃ­nicas</h1>} />
+          <Route path="global-admin/users" element={<h1 className="text-2xl font-bold text-purple-800">ðŸ‘¥ Usuarios Globales</h1>} />
+          <Route path="global-admin/stats" element={<h1 className="text-2xl font-bold text-purple-800">ðŸ“Š EstadÃ­sticas Globales</h1>} />
         </Route>
 
-        {/* --- Rutas Protegidas para el Administrador de Clínica --- */}
+        {/* --- Rutas Protegidas para el Administrador de ClÃ­nica --- */}
         <Route element={<ProtectedRoute userType="admin"><AdminLayout /></ProtectedRoute>}>
           <Route path="admin-dashboard" element={<AdminDashboardPage />} />
           <Route path="admin/user/:userId" element={<UserProfilePage />} />
           <Route path="admin/professional-profile/:userId" element={<ProfessionalProfileDetailPage />} />
           <Route path="admin-dashboard/backups" element={<BackupsPage />} />
           <Route path="admin-dashboard/audit-log" element={<AuditLogPage />} />
-          {/* Próximamente más funcionalidades de admin de clínica */}
+          {/* PrÃ³ximamente mÃ¡s funcionalidades de admin de clÃ­nica */}
         </Route>        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
