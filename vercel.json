@@ -15,7 +15,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "$VITE_API_URL"
+          "value": "https://*.psicoadmin.xyz"
         },
         {
           "key": "Access-Control-Allow-Methods",

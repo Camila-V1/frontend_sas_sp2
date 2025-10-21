@@ -1,50 +1,81 @@
-# 📊 RESUMEN VISUAL DE CAMBIOS
+# 📊 RESUMEN VISUAL DE CAMBIOS - DEPLOYMENT ÚNICO
+
+## 🎯 ACTUALIZACIONES RECIENTES
+
+### ⭐ NUEVA FEATURE (20/Oct/2025): Landing Page Auto-Registro
+✅ **Landing pública:** Clínicas se registran desde `psicoadmin.xyz`  
+✅ **Auto-creación:** Tenant + Admin + DB automáticos  
+✅ **Sin intervención:** Sistema 100% self-service  
+
+### Sistema Deployment Único
+✅ **Más simple:** 1 deployment en lugar de 2  
+✅ **Sin variables de entorno:** Detección automática desde la URL  
+✅ **Más fácil de mantener:** Un solo proyecto en Vercel  
+
+---
 
 ## 📁 Vista General de Archivos
 
 ```
 frontend_sas_sp2/
 │
-├── 📄 .env.example                     ⭐ NUEVO
-├── 📄 .env.production.bienestar        ⭐ NUEVO
-├── 📄 .env.production.mindcare         ⭐ NUEVO
-├── 📄 vercel.json                      ⭐ NUEVO
-├── 📄 .gitignore                       ✏️ MODIFICADO
+├── 📄 .env.example                          ✏️ ACTUALIZADO
+├── 📄 vercel.json                           ✏️ ACTUALIZADO
+├── 📄 .gitignore                            ✏️ MODIFICADO
 │
-├── 📚 ARQUITECTURA.md                  ⭐ NUEVO
-├── 📚 CAMBIOS_PARA_DESPLIEGUE_VERCEL.md ⭐ NUEVO
-├── 📚 CHECKLIST_DESPLIEGUE.md          ⭐ NUEVO
-├── 📚 COMANDOS_UTILES.md               ⭐ NUEVO
-├── 📚 DOCUMENTO_PARA_BACKEND.md        ⭐ NUEVO
-├── 📚 README_DESPLIEGUE.md             ⭐ NUEVO
-├── 📚 RESUMEN_CAMBIOS.md               ⭐ NUEVO
-├── 📚 RESUMEN_VISUAL.md                ⭐ NUEVO (este archivo)
+├── 📚 FEATURE_AUTO_REGISTRO.md              🎉 NUEVO (Landing page auto-registro)
+├── 📚 QUICK_START_LANDING.md                🎉 NUEVO (Guía rápida implementación)
+├── 📚 CAMBIOS_DEPLOYMENT_UNICO.md           ⭐ NUEVO (LEER PRIMERO)
+├── 📚 ACTUALIZACION_BACKEND.md              ⭐ NUEVO
+├── 📚 CHECKLIST_DEPLOYMENT_UNICO.md         ⭐ NUEVO
+├── 📚 ARQUITECTURA.md                       📄 Anterior
+├── 📚 CAMBIOS_PARA_DESPLIEGUE_VERCEL.md     📄 Anterior
+├── 📚 CHECKLIST_DESPLIEGUE.md               📄 Anterior
+├── 📚 COMANDOS_UTILES.md                    📄 Anterior
+├── 📚 DOCUMENTO_PARA_BACKEND.md             📄 Anterior
+├── 📚 README_DESPLIEGUE.md                  📄 Anterior
+├── 📚 RESUMEN_CAMBIOS.md                    📄 Anterior
+├── 📚 RESUMEN_VISUAL.md                     ✏️ ACTUALIZADO (este archivo)
 │
 └── src/
-    ├── api.js                          ✏️ MODIFICADO
+    ├── api.js                               ✏️ MODIFICADO
     └── config/
-        └── tenants.js                  ✏️ MODIFICADO
+        └── tenants.js                       ✏️ ACTUALIZADO (cambios importantes)
 ```
+
+**📖 Documentos prioritarios:**
+1. **FEATURE_AUTO_REGISTRO.md** ← 🎉 NUEVA FEATURE (Landing page)
+2. **QUICK_START_LANDING.md** ← 🎉 Guía rápida implementación
+3. **CAMBIOS_DEPLOYMENT_UNICO.md** ← Sistema deployment único
+4. **CHECKLIST_DEPLOYMENT_UNICO.md** ← Guía paso a paso
+5. **ACTUALIZACION_BACKEND.md** ← Para compartir con backend
 
 ---
 
-## ⭐ ARCHIVOS NUEVOS (8)
+## ⭐ ARCHIVOS NUEVOS (3 documentos importantes)
 
-### 1️⃣ Configuración de Variables de Entorno
+### 1️⃣ Documentación del Deployment Único
 
-| Archivo | Líneas | Propósito |
-|---------|--------|-----------|
-| `.env.example` | 10 | Plantilla para desarrollo local |
-| `.env.production.bienestar` | 5 | Variables para Clínica Bienestar en Vercel |
-| `.env.production.mindcare` | 5 | Variables para Clínica Mindcare en Vercel |
+| Archivo | Páginas | Propósito |
+|---------|---------|-----------|
+| `CAMBIOS_DEPLOYMENT_UNICO.md` | 8 | Explicación completa de los cambios |
+| `ACTUALIZACION_BACKEND.md` | 4 | Documento para compartir con backend |
+| `CHECKLIST_DEPLOYMENT_UNICO.md` | 3 | Checklist rápido para deploy |
 
-**Contenido de `.env.production.bienestar`:**
+### 2️⃣ Configuración Actualizada
+
+**`.env.example` (ACTUALIZADO):**
 ```env
-VITE_API_URL=https://bienestar.psicoadmin.xyz
-VITE_TENANT=bienestar
-VITE_CLINIC_NAME=Clínica Bienestar
-VITE_WS_URL=wss://bienestar.psicoadmin.xyz
+# NO se necesitan variables de entorno en producción
+# El tenant se detecta automáticamente desde la URL
+
+# Para desarrollo local:
+# - http://localhost:5174              → Admin Global
+# - http://bienestar.localhost:5174    → Clínica Bienestar
+# - http://mindcare.localhost:5174     → Clínica Mindcare
 ```
+
+❌ **ELIMINADOS:** `.env.production.bienestar` y `.env.production.mindcare` (ya no se necesitan)
 
 ---
 
@@ -108,64 +139,90 @@ const apiClient = axios.create({
 
 ---
 
-### 2️⃣ `src/config/tenants.js`
+### 2️⃣ `src/config/tenants.js` (CAMBIOS IMPORTANTES)
 
-**Cambio 1:** Agregados dominios de producción en `TENANT_CONFIG`
+**Cambio 1:** Simplificación de `TENANT_CONFIG`
 
 ```javascript
-// AGREGADO:
+// ❌ ANTES (por hostname exacto):
 export const TENANT_CONFIG = {
-    'bienestar-app.psicoadmin.xyz': { ... },      // ⭐ NUEVO
-    'mindcare-app.psicoadmin.xyz': { ... },       // ⭐ NUEVO
-    'bienestar-psico.vercel.app': { ... },        // ⭐ NUEVO
-    'mindcare-psico.vercel.app': { ... },         // ⭐ NUEVO
-    
-    // Existentes (sin cambios)
+    'bienestar-app.psicoadmin.xyz': { ... },
+    'mindcare-app.psicoadmin.xyz': { ... },
     'bienestar.localhost': { ... },
-    'mindcare.localhost': { ... },
-    'localhost': { ... }
+    // etc...
+};
+
+// ✅ AHORA (por nombre de tenant):
+export const TENANT_CONFIG = {
+    bienestar: {
+        name: 'Clínica Bienestar',
+        theme: 'bienestar',
+        logo: '/logos/bienestar.png',
+        colors: { ... }
+    },
+    mindcare: { ... },
+    'global-admin': { ... }
 };
 ```
 
-**Cambio 2:** Actualizada función `getApiBaseURL()`
+**Cambio 2:** Nueva función `getTenantFromHostname()`
 
 ```javascript
-// ANTES:
-export const getApiBaseURL = () => {
+// ⭐ NUEVA FUNCIÓN
+export const getTenantFromHostname = () => {
     const hostname = window.location.hostname;
+    
+    // Detectar tenant desde subdomain
+    if (hostname.includes('mindcare')) return 'mindcare';
+    if (hostname.includes('bienestar')) return 'bienestar';
+    
+    // Desarrollo local
     if (hostname.includes('localhost')) {
-        return `http://${hostname}:8000/api`;
+        const subdomain = hostname.split('.')[0];
+        if (subdomain === 'mindcare') return 'mindcare';
+        if (subdomain === 'bienestar') return 'bienestar';
+        if (subdomain === 'localhost') return 'global-admin';
+        return 'bienestar';
     }
-    return `https://${hostname}/api`;
+    
+    return 'bienestar'; // Default
 };
+```
 
-// DESPUÉS:
+**Cambio 3:** Actualizada función `getApiBaseURL()`
+
+```javascript
+// ❌ ANTES (dependía de variables de entorno):
 export const getApiBaseURL = () => {
-    // ⭐ Prioridad 1: Variable de entorno
     if (import.meta.env.VITE_API_URL) {
         return `${import.meta.env.VITE_API_URL}/api`;
     }
-    
-    // ⭐ Prioridad 2: Configuración por hostname
+    // ... lógica compleja
+};
+
+// ✅ AHORA (construcción automática):
+export const getApiBaseURL = () => {
+    const tenant = getTenantFromHostname();
     const hostname = window.location.hostname;
-    const tenantConfig = TENANT_CONFIG[hostname];
     
-    if (tenantConfig?.apiUrl) {
-        return `${tenantConfig.apiUrl}/api`;
-    }
-    
-    // Prioridad 3: Fallback (sin cambios)
+    // Desarrollo local
     if (hostname.includes('localhost')) {
-        return `http://${hostname}:8000/api`;
+        if (tenant === 'global-admin') {
+            return 'http://localhost:8000/api';
+        }
+        return `http://${tenant}.localhost:8000/api`;
     }
-    return `https://${hostname}/api`;
+    
+    // Producción: construcción automática
+    return `https://${tenant}.psicoadmin.xyz/api`;
 };
 ```
 
 **Impacto:**
-- ✅ Sistema de prioridades para detectar API URL
-- ✅ Soporte para variables de entorno de Vercel
-- ✅ Mantiene compatibilidad con desarrollo local
+- ✅ YA NO usa variables de entorno
+- ✅ Detección automática del tenant desde la URL
+- ✅ Construcción automática de la API URL
+- ✅ Más simple y predecible
 
 ---
 
@@ -187,24 +244,30 @@ export const getApiBaseURL = () => {
 
 ---
 
-## 📊 Estadísticas de Cambios
+## 📊 Estadísticas de Cambios (Actualizado)
 
-### Por Tipo
+### Cambios del Deployment Único
 
-| Tipo | Cantidad | Líneas Totales (aprox) |
-|------|----------|------------------------|
-| **Archivos de Configuración** | 4 | 50 |
-| **Código JavaScript** | 2 | 60 (modificadas) |
-| **Documentación** | 8 | 2,000+ |
-| **TOTAL** | **14** | **2,110+** |
+| Métrica | Valor |
+|---------|-------|
+| **Archivos modificados** | 3 (`tenants.js`, `vercel.json`, `.env.example`) |
+| **Archivos eliminados** | 2 (`.env.production.*`) |
+| **Archivos nuevos** | 3 (documentación) |
+| **Líneas de código agregadas** | ~50 |
+| **Líneas de código eliminadas** | ~150 |
+| **Variables de entorno eliminadas** | 8 (todas) |
+| **Complejidad reducida** | ✅ Significativamente |
 
-### Por Complejidad
+### Comparación: Antes vs Ahora
 
-| Complejidad | Archivos | Descripción |
-|-------------|----------|-------------|
-| 🟢 **Baja** | 6 | Archivos `.env`, `.gitignore`, READMEs simples |
-| 🟡 **Media** | 4 | `vercel.json`, modificaciones en `api.js` y `tenants.js` |
-| 🔵 **Alta** | 4 | Documentación técnica detallada |
+| Aspecto | Sistema Anterior | Sistema Actual |
+|---------|------------------|----------------|
+| **Deployments en Vercel** | 2 proyectos | 1 proyecto |
+| **Variables de entorno** | 8 variables | 0 variables |
+| **Archivos `.env.production.*`** | 2 archivos | 0 archivos |
+| **Configuración manual** | Alta | Ninguna |
+| **Complejidad** | Media | Baja |
+| **Mantenimiento** | Deploy en 2 lugares | Deploy en 1 lugar |
 
 ---
 
@@ -464,17 +527,34 @@ RESUMEN_VISUAL.md (Este archivo)
 
 | Métrica | Valor |
 |---------|-------|
-| **Archivos nuevos** | 11 |
+| **Sistema** | Deployment único con detección automática |
 | **Archivos modificados** | 3 |
-| **Líneas de código agregadas** | ~60 |
-| **Líneas de documentación** | ~2,000 |
-| **Páginas de documentación** | ~50 |
-| **Tiempo de implementación** | ~2 horas |
-| **Tiempo de deploy estimado** | ~1 hora |
+| **Archivos eliminados** | 2 |
+| **Archivos de documentación** | 3 nuevos |
+| **Variables de entorno necesarias** | 0 ✅ |
+| **Proyectos en Vercel necesarios** | 1 (antes: 2) |
+| **Complejidad** | Reducida significativamente |
+| **Tiempo de deploy estimado** | ~50 min |
 | **Cambios en backend requeridos** | 0 ✅ |
 
 ---
 
-**🎉 ¡TODO LISTO PARA DESPLEGAR!**
+## 🎉 VENTAJAS DEL NUEVO SISTEMA
 
-El frontend está 100% preparado para producción. Solo faltan los pasos manuales en Vercel y DNS.
+✅ **Más simple:** 1 deployment en lugar de 2  
+✅ **Sin variables de entorno:** Todo se detecta automáticamente  
+✅ **Más fácil de mantener:** Actualizaciones van a todos los tenants  
+✅ **Más escalable:** Agregar nuevos tenants es trivial  
+✅ **Menos errores:** Menos configuración manual = menos fallos  
+
+---
+
+## 📖 PRÓXIMOS PASOS
+
+1. **Lee:** `CAMBIOS_DEPLOYMENT_UNICO.md` (8 páginas)
+2. **Sigue:** `CHECKLIST_DEPLOYMENT_UNICO.md` (paso a paso)
+3. **Comparte:** `ACTUALIZACION_BACKEND.md` (con backend)
+
+---
+
+**🚀 ¡SISTEMA SIMPLIFICADO Y LISTO PARA DEPLOYMENT ÚNICO!**
