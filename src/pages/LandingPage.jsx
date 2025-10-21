@@ -28,7 +28,7 @@ export default function LandingPage() {
     setCheckingSubdomain(true);
 
     try {
-      const response = await axios.post(${API_BASE_URL}/check-subdomain/, {
+      const response = await axios.post(`${API_BASE_URL}/check-subdomain/`, {
         subdomain
       });
       setSubdomainAvailable(response.data.available);
@@ -59,7 +59,7 @@ export default function LandingPage() {
     setErrors(null);
 
     try {
-      const response = await axios.post(${API_BASE_URL}/register/, formData);
+      const response = await axios.post(`${API_BASE_URL}/register/`, formData);
 
       if (response.data.success) {
         setSuccess(response.data.data);
