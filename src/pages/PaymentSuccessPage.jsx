@@ -39,7 +39,7 @@ const PaymentSuccessPage = () => {
         
         // Redirigir automáticamente después de 3 segundos
         setTimeout(() => {
-          navigate('/my-appointments');
+          navigate('/dashboard');
         }, 3000);
         
       } catch (err) {
@@ -75,7 +75,7 @@ const PaymentSuccessPage = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Error de Verificación</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => navigate('/my-appointments')}
+            onClick={() => navigate('/dashboard')}
             className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg"
           >
             Ver Mis Citas
@@ -116,7 +116,7 @@ const PaymentSuccessPage = () => {
         
         <div className="space-y-3">
           <button
-            onClick={() => navigate('/my-appointments')}
+            onClick={() => navigate('/dashboard')}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
           >
             Ver Mis Citas
