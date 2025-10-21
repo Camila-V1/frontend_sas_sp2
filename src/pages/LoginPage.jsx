@@ -81,15 +81,16 @@ function LoginPage() {
             }
             
             console.log('✅ Login exitoso:', loginResponse.data);
-
-            // Guardamos el token
-            localStorage.setItem('authToken', loginResponse.data.token);
+            
+            // Guardamos el token (usar mismo nombre en todo el sistema)
+            localStorage.setItem('access_token', loginResponse.data.token);
+            localStorage.setItem('authToken', loginResponse.data.token); // Compatibilidad
+            localStorage.setItem('refresh_token', loginResponse.data.refresh_token || ''); // Si existe
             
             // Guardamos el tipo de usuario
             const userType = loginResponse.data.user.user_type;
             localStorage.setItem('userType', userType);
-            
-            // Guardamos info básica del usuario
+            localStorage.setItem('user', JSON.stringify(loginResponse.data.user));            // Guardamos info básica del usuario
             localStorage.setItem('currentUser', JSON.stringify({
                 id: loginResponse.data.user.id,
                 first_name: loginResponse.data.user.first_name
