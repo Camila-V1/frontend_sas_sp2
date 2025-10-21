@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getTenantFromHostname } from '../config/tenants';
@@ -7,48 +7,9 @@ const API_BASE_URL = 'https://psico-admin.onrender.com/api/tenants/public';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  
+  // ✅ TODOS LOS HOOKS AL INICIO (antes de cualquier return)
   const [isCheckingTenant, setIsCheckingTenant] = useState(true);
-
-  // 🔥 FIX CRÍTICO: Solo ejecutar UNA VEZ al montar el componente
-  useEffect(() => {
-    const checkIfTenantExists = async () => {
-      const hostname = window.location.hostname;
-      const currentTenant = getTenantFromHostname();
-      
-      // Si estamos en el dominio raíz (psicoadmin.xyz), mostrar formulario de registro
-      const isRootDomain = hostname === 'psicoadmin.xyz' || hostname === 'www.psicoadmin.xyz';
-      
-      if (isRootDomain) {
-        console.log('✅ Dominio raíz detectado - mostrando formulario de registro de clínicas');
-        setIsCheckingTenant(false);
-        return;
-      }
-      
-      // Si estamos en un subdominio de clínica (-app.psicoadmin.xyz), redirigir a login
-      if (hostname.includes('-app.psicoadmin.xyz') && currentTenant && currentTenant !== 'global-admin') {
-        console.log(`🏥 Subdominio detectado: ${currentTenant} - redirigiendo a /login`);
-        navigate('/login');
-        return;
-      }
-      
-      setIsCheckingTenant(false);
-    };
-
-    checkIfTenantExists();
-  }, []); // ← VACÍO: Solo ejecuta una vez al montar
-
-  // Mostrar loader mientras verifica
-  if (isCheckingTenant) {
-    return (
-      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4'></div>
-          <p className='text-gray-600 text-lg'>Verificando clínica...</p>
-        </div>
-      </div>
-    );
-  }
-
   const [formData, setFormData] = useState({
     clinic_name: '',
     subdomain: '',
@@ -56,12 +17,39 @@ export default function LandingPage() {
     admin_phone: '',
     address: ''
   });
-
   const [subdomainAvailable, setSubdomainAvailable] = useState(null);
   const [checkingSubdomain, setCheckingSubdomain] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [errors, setErrors] = useState(null);
+
+  // 🔥 FIX CRÍTICO: Solo ejecutar UNA VEZ al montar el componente
+  useEffect(() => {
+    const checkIfTenantExists = async () => {
+      const hostname = window.location.hostname;
+      const currentTenant = getTenantFromHostname();
+
+      // Si estamos en el dominio raíz (psicoadmin.xyz), mostrar formulario de registro
+      const isRootDomain = hostname === 'psicoadmin.xyz' || hostname === 'www.psicoadmin.xyz' || hostname === 'localhost';
+      
+      if (isRootDomain) {
+        console.log('✅ Dominio raíz detectado - mostrando formulario de registro de clínicas');
+        setIsCheckingTenant(false);
+        return;
+      }
+
+      // Si estamos en un subdominio de clínica (-app.psicoadmin.xyz), redirigir a login
+      if (hostname.includes('-app.psicoadmin.xyz') && currentTenant && currentTenant !== 'global-admin') {
+        console.log(`🏥 Subdominio detectado: ${currentTenant} - redirigiendo a /login`);
+        navigate('/login');
+        return;
+      }
+
+      setIsCheckingTenant(false);
+    };
+
+    checkIfTenantExists();
+  }, []); // ← VACÍO: Solo ejecuta una vez al montar
 
   // Verificar disponibilidad del subdominio con debounce
   const checkSubdomain = async (subdomain) => {
@@ -120,13 +108,25 @@ export default function LandingPage() {
     }
   };
 
+  // Mostrar loader mientras verifica
+  if (isCheckingTenant) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4'></div>
+          <p className='text-gray-600 text-lg'>Verificando clínica...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'>
       {/* Hero Section */}
       <div className='container mx-auto px-4 py-12'>
         <div className='text-center mb-12'>
           <h1 className='text-5xl font-bold text-gray-900 mb-4'>
-             Psico Admin
+            🏥 Psico Admin
           </h1>
           <p className='text-xl text-gray-600 mb-2'>
             Sistema de Gestión para Clínicas Psicológicas
@@ -146,238 +146,195 @@ export default function LandingPage() {
               </h2>
 
               <form onSubmit={handleSubmit} className='space-y-6'>
+                {/* Mostrar errores generales */}
+                {errors?.general && (
+                  <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative'>
+                    {errors.general.map((error, index) => (
+                      <p key={index}>{error}</p>
+                    ))}
+                  </div>
+                )}
+
                 {/* Nombre de la clínica */}
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Nombre de la Clínica <span className='text-red-500'>*</span>
+                  <label htmlFor='clinic_name' className='block text-sm font-medium text-gray-700 mb-2'>
+                    Nombre de la Clínica *
                   </label>
                   <input
                     type='text'
-                    required
+                    id='clinic_name'
+                    name='clinic_name'
                     value={formData.clinic_name}
                     onChange={(e) => setFormData({...formData, clinic_name: e.target.value})}
-                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
-                    placeholder='Ej: Clínica Bienestar'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    placeholder='Clínica Bienestar'
+                    required
                   />
                   {errors?.clinic_name && (
-                    <p className='text-red-600 text-sm mt-1'>{errors.clinic_name[0]}</p>
+                    <p className='mt-1 text-sm text-red-600'>{errors.clinic_name[0]}</p>
                   )}
                 </div>
 
                 {/* Subdominio */}
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Subdominio <span className='text-red-500'>*</span>
+                  <label htmlFor='subdomain' className='block text-sm font-medium text-gray-700 mb-2'>
+                    Subdominio *
                   </label>
-                  <div className='flex items-center gap-2'>
-                    <div className='flex-1 relative'>
-                      <input
-                        type='text'
-                        required
-                        value={formData.subdomain}
-                        onChange={(e) => handleSubdomainChange(e.target.value)}
-                        className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10'
-                        placeholder='miclinica'
-                      />
-                      {checkingSubdomain && (
-                        <div className='absolute right-3 top-3'>
-                          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500'></div>
-                        </div>
-                      )}
-                    </div>
-                    <span className='text-gray-600 font-medium whitespace-nowrap'>
-                      .psicoadmin.xyz
+                  <div className='flex items-center'>
+                    <input
+                      type='text'
+                      id='subdomain'
+                      name='subdomain'
+                      value={formData.subdomain}
+                      onChange={(e) => handleSubdomainChange(e.target.value)}
+                      className='flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                      placeholder='bienestar'
+                      required
+                    />
+                    <span className='px-4 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-gray-600 text-sm'>
+                      -app.psicoadmin.xyz
                     </span>
                   </div>
-
-                  {/* Indicador de disponibilidad */}
+                  {checkingSubdomain && (
+                    <p className='mt-1 text-sm text-blue-600'>Verificando disponibilidad...</p>
+                  )}
                   {subdomainAvailable === true && (
-                    <p className='text-green-600 text-sm mt-2 flex items-center gap-1'>
-                      <span className='text-lg'></span> Subdominio disponible
-                    </p>
+                    <p className='mt-1 text-sm text-green-600'>✓ Subdominio disponible</p>
                   )}
                   {subdomainAvailable === false && (
-                    <p className='text-red-600 text-sm mt-2 flex items-center gap-1'>
-                      <span className='text-lg'></span> Subdominio no disponible
-                    </p>
+                    <p className='mt-1 text-sm text-red-600'>✗ Subdominio no disponible</p>
                   )}
                   {errors?.subdomain && (
-                    <p className='text-red-600 text-sm mt-1'>{errors.subdomain[0]}</p>
+                    <p className='mt-1 text-sm text-red-600'>{errors.subdomain[0]}</p>
                   )}
-
-                  <p className='text-xs text-gray-500 mt-2'>
-                    Mínimo 3 caracteres. Solo letras, números y guiones.
-                  </p>
                 </div>
 
-                {/* Email */}
+                {/* Email del administrador */}
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Email del Administrador <span className='text-red-500'>*</span>
+                  <label htmlFor='admin_email' className='block text-sm font-medium text-gray-700 mb-2'>
+                    Email del Administrador *
                   </label>
                   <input
                     type='email'
-                    required
+                    id='admin_email'
+                    name='admin_email'
                     value={formData.admin_email}
                     onChange={(e) => setFormData({...formData, admin_email: e.target.value})}
-                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
-                    placeholder='admin@example.com'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    placeholder='admin@tuclínica.com'
+                    required
                   />
                   {errors?.admin_email && (
-                    <p className='text-red-600 text-sm mt-1'>{errors.admin_email[0]}</p>
+                    <p className='mt-1 text-sm text-red-600'>{errors.admin_email[0]}</p>
                   )}
-                  <p className='text-xs text-gray-500 mt-2'>
-                    Recibirás las credenciales de acceso en este email
-                  </p>
                 </div>
 
                 {/* Teléfono (opcional) */}
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Teléfono <span className='text-gray-400'>(opcional)</span>
+                  <label htmlFor='admin_phone' className='block text-sm font-medium text-gray-700 mb-2'>
+                    Teléfono (opcional)
                   </label>
                   <input
                     type='tel'
+                    id='admin_phone'
+                    name='admin_phone'
                     value={formData.admin_phone}
                     onChange={(e) => setFormData({...formData, admin_phone: e.target.value})}
-                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
-                    placeholder='+34 600 000 000'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    placeholder='+1 234 567 8900'
                   />
-                  {errors?.admin_phone && (
-                    <p className='text-red-600 text-sm mt-1'>{errors.admin_phone[0]}</p>
-                  )}
                 </div>
 
                 {/* Dirección (opcional) */}
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Dirección <span className='text-gray-400'>(opcional)</span>
+                  <label htmlFor='address' className='block text-sm font-medium text-gray-700 mb-2'>
+                    Dirección (opcional)
                   </label>
                   <input
                     type='text'
+                    id='address'
+                    name='address'
                     value={formData.address}
                     onChange={(e) => setFormData({...formData, address: e.target.value})}
-                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
-                    placeholder='Calle Principal 123, Madrid'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    placeholder='Calle Principal #123, Ciudad'
                   />
-                  {errors?.address && (
-                    <p className='text-red-600 text-sm mt-1'>{errors.address[0]}</p>
-                  )}
                 </div>
 
-                {/* Error general */}
-                {errors?.general && (
-                  <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>
-                    {errors.general[0]}
-                  </div>
-                )}
-
-                {/* Botón */}
+                {/* Botón de envío */}
                 <button
                   type='submit'
-                  disabled={loading || subdomainAvailable === false || checkingSubdomain}
-                  className='w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed transition transform hover:scale-[1.02] active:scale-[0.98]'
+                  disabled={loading || subdomainAvailable === false}
+                  className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors'
                 >
-                  {loading ? (
-                    <span className='flex items-center justify-center gap-2'>
-                      <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
-                      Creando Tu Clínica...
-                    </span>
-                  ) : (
-                    ' Crear Mi Clínica Ahora'
-                  )}
+                  {loading ? 'Registrando...' : 'Registrar Clínica'}
                 </button>
-
-                <p className='text-xs text-gray-500 text-center mt-4'>
-                  Al registrarte, aceptas nuestros términos y condiciones
-                </p>
               </form>
+
+              <p className='mt-4 text-sm text-gray-600 text-center'>
+                ¿Ya tienes una clínica? <a href='/login' className='text-blue-600 hover:underline'>Inicia sesión</a>
+              </p>
             </div>
           ) : (
             // MENSAJE DE ÉXITO
-            <div className='p-8 text-center space-y-6'>
-              <div className='text-8xl mb-4'></div>
-              <h2 className='text-3xl font-bold text-green-600'>
-                ¡Clínica Creada Exitosamente!
+            <div className='p-8 text-center'>
+              <div className='text-green-500 text-6xl mb-4'>✓</div>
+              <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+                ¡Clínica Registrada Exitosamente!
               </h2>
-              <p className='text-gray-600 text-lg'>
-                Tu sistema está listo para usar
+              <p className='text-gray-600 mb-4'>
+                Tu clínica <strong>{success.clinic_name}</strong> ha sido creada.
               </p>
-
-              {/* Credenciales */}
-              <div className='bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 p-6 rounded-lg text-left'>
-                <p className='font-semibold text-lg mb-4 text-gray-900'>
-                   Datos de Acceso:
+              <div className='bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6'>
+                <p className='text-sm text-blue-800 mb-2'>
+                  <strong>URL de tu clínica:</strong>
                 </p>
-                <div className='space-y-3 text-gray-700'>
-                  <div>
-                    <span className='font-medium'>Email:</span>
-                    <p className='text-lg'>{success.admin_email}</p>
-                  </div>
-                  <div>
-                    <span className='font-medium'>Contraseña temporal:</span>
-                    <div className='bg-white px-4 py-2 rounded border border-gray-300 font-mono text-lg mt-1'>
-                      {success.temporary_password}
-                    </div>
-                    <p className='text-sm text-orange-600 mt-1'>
-                       Cambia esta contraseña después del primer inicio de sesión
-                    </p>
-                  </div>
-                  <div className='pt-3 border-t border-gray-300'>
-                    <span className='font-medium'>URL de tu sistema:</span>
-                    <a
-                      href={success.admin_url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='block text-blue-600 hover:underline text-lg mt-1 break-all'
-                    >
-                      {success.admin_url}
-                    </a>
-                  </div>
-                </div>
+                <a
+                  href={`https://${success.subdomain}-app.psicoadmin.xyz`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-blue-600 hover:underline font-medium'
+                >
+                  {success.subdomain}-app.psicoadmin.xyz
+                </a>
               </div>
-
-              {/* Botón de acceso */}
-              <button
-                onClick={() => window.location.href = success.admin_url}
-                className='w-full bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-green-700 hover:to-blue-700 transition transform hover:scale-[1.02] active:scale-[0.98]'
-              >
-                 Ir al Panel de Administración
-              </button>
-
-              <p className='text-sm text-gray-500'>
-                También hemos enviado estos datos a tu email
+              <p className='text-sm text-gray-600 mb-4'>
+                Se ha enviado un email a <strong>{success.admin_email}</strong> con las credenciales de acceso.
               </p>
+              <a
+                href={`https://${success.subdomain}-app.psicoadmin.xyz/login`}
+                className='inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors'
+              >
+                Ir al Login
+              </a>
             </div>
           )}
         </div>
 
-        {/* Features */}
-        {!success && (
-          <div className='mt-16 grid md:grid-cols-3 gap-8 max-w-5xl mx-auto'>
-            <div className='text-center'>
-              <div className='text-4xl mb-3'></div>
-              <h3 className='font-semibold text-gray-900 mb-2'>Activación Instantánea</h3>
-              <p className='text-gray-600 text-sm'>
-                Tu sistema estará listo en menos de 30 segundos
-              </p>
-            </div>
-            <div className='text-center'>
-              <div className='text-4xl mb-3'></div>
-              <h3 className='font-semibold text-gray-900 mb-2'>Datos Aislados</h3>
-              <p className='text-gray-600 text-sm'>
-                Cada clínica tiene su propia base de datos privada
-              </p>
-            </div>
-            <div className='text-center'>
-              <div className='text-4xl mb-3'></div>
-              <h3 className='font-semibold text-gray-900 mb-2'>Personalizable</h3>
-              <p className='text-gray-600 text-sm'>
-                Configura colores, logo y funcionalidades a tu medida
-              </p>
-            </div>
+        {/* Características */}
+        <div className='max-w-5xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-3 gap-6'>
+          <div className='bg-white p-6 rounded-lg shadow text-center'>
+            <div className='text-4xl mb-4'>🔒</div>
+            <h3 className='font-semibold text-gray-900 mb-2'>Multi-Tenant Seguro</h3>
+            <p className='text-sm text-gray-600'>
+              Cada clínica tiene su propia base de datos completamente aislada
+            </p>
           </div>
-        )}
+          <div className='bg-white p-6 rounded-lg shadow text-center'>
+            <div className='text-4xl mb-4'>⚡</div>
+            <h3 className='font-semibold text-gray-900 mb-2'>Configuración Rápida</h3>
+            <p className='text-sm text-gray-600'>
+              Tu instancia lista en menos de 2 minutos
+            </p>
+          </div>
+          <div className='bg-white p-6 rounded-lg shadow text-center'>
+            <div className='text-4xl mb-4'>📊</div>
+            <h3 className='font-semibold text-gray-900 mb-2'>Gestión Completa</h3>
+            <p className='text-sm text-gray-600'>
+              Citas, expedientes, pagos y más en una sola plataforma
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
