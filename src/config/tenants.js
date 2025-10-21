@@ -2,6 +2,48 @@
 
 // Configuración de dominios multi-tenant
 export const TENANT_CONFIG = {
+    // Dominios de PRODUCCIÓN
+    'bienestar-app.psicoadmin.xyz': {
+        name: 'Clínica Bienestar',
+        theme: 'bienestar',
+        logo: '/logos/bienestar.png',
+        colors: {
+            primary: '#0066CC',
+            secondary: '#00AA44'
+        },
+        apiUrl: 'https://bienestar.psicoadmin.xyz'
+    },
+    'mindcare-app.psicoadmin.xyz': {
+        name: 'MindCare Psicología',
+        theme: 'mindcare',
+        logo: '/logos/mindcare.png',
+        colors: {
+            primary: '#6B46C1',
+            secondary: '#EC4899'
+        },
+        apiUrl: 'https://mindcare.psicoadmin.xyz'
+    },
+    // Dominios de Vercel (por si acaso)
+    'bienestar-psico.vercel.app': {
+        name: 'Clínica Bienestar',
+        theme: 'bienestar',
+        logo: '/logos/bienestar.png',
+        colors: {
+            primary: '#0066CC',
+            secondary: '#00AA44'
+        },
+        apiUrl: 'https://bienestar.psicoadmin.xyz'
+    },
+    'mindcare-psico.vercel.app': {
+        name: 'MindCare Psicología',
+        theme: 'mindcare',
+        logo: '/logos/mindcare.png',
+        colors: {
+            primary: '#6B46C1',
+            secondary: '#EC4899'
+        },
+        apiUrl: 'https://mindcare.psicoadmin.xyz'
+    },
     // Dominios de desarrollo local
     'bienestar.localhost': {
         name: 'Clínica Bienestar',
@@ -42,11 +84,25 @@ export const getCurrentTenant = () => {
 
 // Función para obtener la URL base de la API
 export const getApiBaseURL = () => {
+    // Prioridad 1: Variable de entorno de Vite
+    if (import.meta.env.VITE_API_URL) {
+        return `${import.meta.env.VITE_API_URL}/api`;
+    }
+    
+    // Prioridad 2: Configuración basada en hostname
     const hostname = window.location.hostname;
+    const tenantConfig = TENANT_CONFIG[hostname];
+    
+    if (tenantConfig?.apiUrl) {
+        return `${tenantConfig.apiUrl}/api`;
+    }
+    
+    // Prioridad 3: Construcción automática
     if (hostname.includes('localhost')) {
         return `http://${hostname}:8000/api`;
     }
-    // Para producción
+    
+    // Para producción (fallback)
     return `https://${hostname}/api`;
 };
 

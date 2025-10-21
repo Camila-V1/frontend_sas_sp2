@@ -10,6 +10,7 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true, // CRÍTICO: Permite enviar/recibir cookies en peticiones cross-origin
 });
 
 // Esto es un "interceptor": se ejecuta ANTES de cada petición.
