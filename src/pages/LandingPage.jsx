@@ -9,7 +9,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [isCheckingTenant, setIsCheckingTenant] = useState(true);
 
-  // Verificar si el tenant actual ya existe
+  // 🔥 FIX CRÍTICO: Solo ejecutar UNA VEZ al montar el componente
   useEffect(() => {
     const checkIfTenantExists = async () => {
       const hostname = window.location.hostname;
@@ -19,34 +19,23 @@ export default function LandingPage() {
       const isRootDomain = hostname === 'psicoadmin.xyz' || hostname === 'www.psicoadmin.xyz';
       
       if (isRootDomain) {
-        console.log('Dominio raíz detectado - mostrando formulario de registro de clínicas');
+        console.log('✅ Dominio raíz detectado - mostrando formulario de registro de clínicas');
         setIsCheckingTenant(false);
         return;
       }
       
-      // Si estamos en un subdominio de clínica (-app.psicoadmin.xyz), verificar si existe
+      // Si estamos en un subdominio de clínica (-app.psicoadmin.xyz), redirigir a login
       if (hostname.includes('-app.psicoadmin.xyz') && currentTenant && currentTenant !== 'global-admin') {
-        try {
-          const response = await axios.post(`${API_BASE_URL}/check-subdomain/`, {
-            subdomain: currentTenant
-          });
-          
-          // Si el tenant NO está disponible (ya existe), redirigir al login
-          if (response.data.available === false) {
-            console.log(`Tenant '${currentTenant}' ya existe, redirigiendo a login...`);
-            navigate('/login');
-            return;
-          }
-        } catch (err) {
-          console.error('Error verificando tenant:', err);
-        }
+        console.log(`🏥 Subdominio detectado: ${currentTenant} - redirigiendo a /login`);
+        navigate('/login');
+        return;
       }
       
       setIsCheckingTenant(false);
     };
 
     checkIfTenantExists();
-  }, [navigate]);
+  }, []); // ← VACÍO: Solo ejecuta una vez al montar
 
   // Mostrar loader mientras verifica
   if (isCheckingTenant) {
