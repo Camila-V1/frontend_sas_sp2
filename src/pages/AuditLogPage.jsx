@@ -57,7 +57,7 @@ function AuditLogPage() {
             if (filters.search) params.append('search', filters.search);
 
             // Llamar al endpoint de exportación
-            const response = await apiClient.get(`/auditlog/export-pdf/?${params.toString()}`, {
+            const response = await apiClient.get(`/auditlog/logs/export-pdf/?${params.toString()}`, {
                 responseType: 'blob', // Importante para recibir el PDF como blob
             });
 
