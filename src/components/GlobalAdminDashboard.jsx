@@ -15,13 +15,13 @@ function GlobalAdminDashboard() {
             try {
                 // ⚠️ CRÍTICO: Admin global SIEMPRE usa el backend público
                 const PUBLIC_API_URL = 'https://psico-admin.onrender.com/api';
-                const token = localStorage.getItem('authToken');
+                const token = localStorage.getItem('access_token') || localStorage.getItem('authToken');
                 
                 console.log('🌐 GlobalAdmin - Cargando datos del backend público:', PUBLIC_API_URL);
                 console.log('🔐 Token presente:', !!token);
 
                 // Usar el endpoint de estadísticas del backend público
-                const statsResponse = await axios.get(`${PUBLIC_API_URL}/tenants/admin/stats/`, {
+                const statsResponse = await axios.get(`${PUBLIC_API_URL}/tenants/`, {
                     headers: {
                         'Authorization': `Token ${token}`,
                         'Content-Type': 'application/json'
@@ -30,10 +30,12 @@ function GlobalAdminDashboard() {
                 });
                 
                 console.log('✅ Estadísticas cargadas:', statsResponse.data);
-                setStats(statsResponse.data);
-                setClinics(statsResponse.data.clinics || []);
+                // Parse response
+                const clinicsData = Array.isArray(statsResponse.data) ? statsResponse.data : statsResponse.data.results || [];
+                setStats({ total_clinics: clinicsData.length, clinics: clinicsData });
+                setClinics(clinicsData);
             } catch (err) {
-                console.warn("⚠️ Endpoint /tenants/admin/stats/ no disponible, usando datos simulados:", err);
+                console.warn("⚠️ Endpoint /tenants/ no disponible, usando datos simulados:", err);
                 // Datos simulados actualizados con las estadísticas correctas
                 const mockStats = {
                     total_clinics: 2,
@@ -250,3 +252,5 @@ function GlobalAdminDashboard() {
 }
 
 export default GlobalAdminDashboard;
+
+
