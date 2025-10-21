@@ -1,9 +1,55 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getTenantFromHostname } from '../config/tenants';
 
 const API_BASE_URL = 'https://psico-admin.onrender.com/api/tenants/public';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const [isCheckingTenant, setIsCheckingTenant] = useState(true);
+
+  // Verificar si el tenant actual ya existe
+  useEffect(() => {
+    const checkIfTenantExists = async () => {
+      const currentTenant = getTenantFromHostname();
+      
+      // Si estamos en un tenant específico (no global-admin), verificar si existe
+      if (currentTenant && currentTenant !== 'global-admin') {
+        try {
+          const response = await axios.post(`${API_BASE_URL}/check-subdomain/`, {
+            subdomain: currentTenant
+          });
+          
+          // Si el tenant NO está disponible (ya existe), redirigir al login
+          if (response.data.available === false) {
+            console.log(`Tenant '${currentTenant}' ya existe, redirigiendo a login...`);
+            navigate('/login');
+            return;
+          }
+        } catch (err) {
+          console.error('Error verificando tenant:', err);
+        }
+      }
+      
+      setIsCheckingTenant(false);
+    };
+
+    checkIfTenantExists();
+  }, [navigate]);
+
+  // Mostrar loader mientras verifica
+  if (isCheckingTenant) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4'></div>
+          <p className='text-gray-600 text-lg'>Verificando clínica...</p>
+        </div>
+      </div>
+    );
+  }
+
   const [formData, setFormData] = useState({
     clinic_name: '',
     subdomain: '',
