@@ -1,7 +1,7 @@
 // src/components/GlobalAdminDashboard.jsx
 
 import { useState, useEffect } from 'react';
-import apiClient from '../api';
+import axios from 'axios';
 import { Globe, Link as LinkIcon, Building, Users } from 'lucide-react';
 
 function GlobalAdminDashboard() {
@@ -13,12 +13,27 @@ function GlobalAdminDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Usar el endpoint de estadísticas corregido
-                const statsResponse = await apiClient.get('/tenants/admin/stats/');
+                // ⚠️ CRÍTICO: Admin global SIEMPRE usa el backend público
+                const PUBLIC_API_URL = 'https://psico-admin.onrender.com/api';
+                const token = localStorage.getItem('authToken');
+                
+                console.log('🌐 GlobalAdmin - Cargando datos del backend público:', PUBLIC_API_URL);
+                console.log('🔐 Token presente:', !!token);
+
+                // Usar el endpoint de estadísticas del backend público
+                const statsResponse = await axios.get(`${PUBLIC_API_URL}/tenants/admin/stats/`, {
+                    headers: {
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+                
+                console.log('✅ Estadísticas cargadas:', statsResponse.data);
                 setStats(statsResponse.data);
                 setClinics(statsResponse.data.clinics || []);
             } catch (err) {
-                console.warn("Endpoint /tenants/admin/stats/ no disponible, usando datos simulados:", err);
+                console.warn("⚠️ Endpoint /tenants/admin/stats/ no disponible, usando datos simulados:", err);
                 // Datos simulados actualizados con las estadísticas correctas
                 const mockStats = {
                     total_clinics: 2,
@@ -32,7 +47,7 @@ function GlobalAdminDashboard() {
                             total_users: 9,
                             patients: 5,
                             professionals: 3,
-                            domains: [{ domain: 'bienestar.localhost', is_primary: true }],
+                            domains: [{ domain: 'bienestar-app.psicoadmin.xyz', is_primary: true }],
                             created_on: '2024-01-15'
                         },
                         {
@@ -41,7 +56,7 @@ function GlobalAdminDashboard() {
                             total_users: 69,
                             patients: 55,
                             professionals: 13,
-                            domains: [{ domain: 'mindcare.localhost', is_primary: true }],
+                            domains: [{ domain: 'mindcare-app.psicoadmin.xyz', is_primary: true }],
                             created_on: '2024-02-20'
                         }
                     ]
@@ -166,7 +181,7 @@ function GlobalAdminDashboard() {
                                         {clinic.domains.map(domain => (
                                             <div key={domain.domain} className="mb-1">
                                                 <a 
-                                                    href={`http://${domain.domain}:8000/admin/`} 
+                                                    href={`https://${domain.domain}`} 
                                                     target="_blank" 
                                                     rel="noopener noreferrer"
                                                     className="text-primary hover:underline"
@@ -192,15 +207,15 @@ function GlobalAdminDashboard() {
                                     <td className="p-4">
                                         <div className="flex gap-2">
                                             <a 
-                                                href={`http://${clinic.domains[0].domain}:8000/admin/`}
+                                                href={`https://${clinic.schema_name}.psicoadmin.xyz/admin/`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="bg-primary text-primary-foreground px-3 py-1 rounded text-sm hover:bg-primary/90"
                                             >
-                                                Ver Admin
+                                                Admin Backend
                                             </a>
                                             <a 
-                                                href={`http://${clinic.domains[0].domain}:5177/`}
+                                                href={`https://${clinic.schema_name}-app.psicoadmin.xyz/`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="bg-secondary text-secondary-foreground px-3 py-1 rounded text-sm hover:bg-secondary/90"
