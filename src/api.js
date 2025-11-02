@@ -6,7 +6,7 @@ import { getApiBaseURL } from './config/tenants';
 // Creamos una instancia de axios con configuración dinámica
 const apiClient = axios.create({
     baseURL: getApiBaseURL(),
-    timeout: 10000,
+    timeout: 90000,
     headers: {
         'Content-Type': 'application/json',
     },

@@ -1,10 +1,10 @@
 // src/main.jsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // <-- AÑADIDO useState, useEffect
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate, Outlet } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify'; // <-- CAMBIO: REACT-TOASTIFY EN LUGAR DE SONNER
-import 'react-toastify/dist/ReactToastify.css'; // <-- ESTILOS DE REACT-TOASTIFY
+import { ToastContainer } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
 
 // Importaciones de Páginas
 import App from './App.jsx';
@@ -20,22 +20,27 @@ import PsychologistDashboard from './pages/PsychologistDashboard.jsx';
 import PsychologistAvailabilityPage from './pages/PsychologistAvailabilityPage.jsx';
 import PsychologistProfilePage from './pages/PsychologistProfilePage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
-import SessionNotePage from './pages/SessionNotePage.jsx'; // <-- NUEVA PÁGINA
-import DocumentsPage from './pages/DocumentsPage.jsx'; // <-- PÁGINA PARA PSICÓLOGOS
-import MyDocumentsPage from './pages/MyDocumentsPage.jsx'; // <-- PÁGINA PARA PACIENTES
-import AdminDashboardPage from './pages/AdminDashboardPage.jsx'; // <-- DASHBOARD ADMIN DINÁMICO
-import UserProfilePage from './pages/UserProfilePage.jsx'; // <-- PÁGINA DE PERFIL DE USUARIO
-import ProfessionalProfileDetailPage from './pages/ProfessionalProfileDetailPage.jsx'; // <-- PERFIL PROFESIONAL DETALLADO
-import PaymentSuccessPage from './pages/PaymentSuccessPage.jsx'; // <-- PÁGINA DE ÉXITO DE PAGO
-import LandingPage from './pages/LandingPage.jsx'; // <-- LANDING DE REGISTRO P�BLICO
-import PaymentCancelPage from './pages/PaymentCancelPage.jsx'; // <-- PÁGINA DE CANCELACIÓN DE PAGO
-import ClinicalHistoryPage from './pages/ClinicalHistoryPage.jsx'; // <-- PÁGINA DE HISTORIAL CLÍNICO
-import BackupsPage from './pages/BackupsPage.jsx'; // <-- PÁGINA DE COPIAS DE SEGURIDAD
-import AuditLogPage from './pages/AuditLogPage.jsx'; // <-- PÁGINA DE BITÁCORA
+import SessionNotePage from './pages/SessionNotePage.jsx';
+import DocumentsPage from './pages/DocumentsPage.jsx';
+import MyDocumentsPage from './pages/MyDocumentsPage.jsx';
+import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
+import UserProfilePage from './pages/UserProfilePage.jsx';
+import ProfessionalProfileDetailPage from './pages/ProfessionalProfileDetailPage.jsx';
+import PaymentSuccessPage from './pages/PaymentSuccessPage.jsx';
+import LandingPage from './pages/LandingPage.jsx';
+import PaymentCancelPage from './pages/PaymentCancelPage.jsx';
+import ClinicalHistoryPage from './pages/ClinicalHistoryPage.jsx';
+import BackupsPage from './pages/BackupsPage.jsx';
+import AuditLogPage from './pages/AuditLogPage.jsx';
+import TriagePage from './pages/TriagePage.jsx'; // (La del paso anterior)
+import MoodJournalHistoryPage from './pages/MoodJournalHistoryPage.jsx'; // <-- 3. AÑADIR NUEVA PÁGINA DE HISTORIAL
+
 // Importaciones de Componentes
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-import TenantInfo from './components/TenantInfo.jsx'; // <-- COMPONENTE MULTI-TENANT
-import Chatbot from './components/Chatbot.jsx'; // <-- CHATBOT INTELIGENTE
+import TenantInfo from './components/TenantInfo.jsx';
+import Chatbot from './components/Chatbot.jsx';
+import MoodJournalModal from './components/MoodJournalModal.jsx'; // <-- 1. AÑADIR NUEVO MODAL
+import apiClient from './api'; // <-- 2. AÑADIR API CLIENT
 import './index.css'; 
 
 // --- Clases de Botones (sin cambios) ---
@@ -47,16 +52,53 @@ const navLink = "text-sidebar-foreground font-medium hover:text-primary transiti
 // --- LAYOUTS ---
 
 // Layout para el Paciente
-// Layout para el Paciente
 function DashboardLayout() {
     const navigate = useNavigate();
+    
+    // --- LÓGICA DE IDEA 1: POPUP DIARIO ---
+    const [showMoodModal, setShowMoodModal] = useState(false);
+
+    useEffect(() => {
+        // Esta función se ejecuta CADA VEZ que el paciente carga el dashboard
+        const checkMoodJournalToday = async () => {
+            try {
+                // 1. Llama al endpoint de verificación
+                await apiClient.get('/clinical-history/mood-journal/today/');
+                // 2. Si da 200 OK, no hace nada (ya lo completó)
+                console.log("Diario de ánimo ya completado hoy.");
+            } catch (err) {
+                // 3. Si da 404, ¡es la señal! Muestra el modal
+                if (err.response && err.response.status === 404) {
+                    console.log("Diario de ánimo no encontrado para hoy, mostrando modal.");
+                    setShowMoodModal(true);
+                } else {
+                    // Otro error
+                    console.error("Error al verificar el diario de ánimo:", err);
+                }
+            }
+        };
+
+        checkMoodJournalToday();
+    }, []); // El array vacío asegura que se ejecute solo una vez al cargar el layout
+
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         navigate('/login');
     };
+    
     return (
         <div>
-            {/* ToastContainer para notificaciones */}
+            {/* 4. RENDERIZAR EL MODAL (estará oculto hasta que showMoodModal sea true) */}
+            <MoodJournalModal 
+                isOpen={showMoodModal}
+                onClose={(didSubmit) => {
+                    setShowMoodModal(false);
+                    if (didSubmit) {
+                        // Opcional: podrías querer recargar algo si se completó
+                    }
+                }}
+            />
+
             <ToastContainer 
                 position="top-right"
                 autoClose={5000}
@@ -74,6 +116,8 @@ function DashboardLayout() {
                 <Link to="/dashboard" className="text-xl font-bold text-primary">Psico SAS</Link>
                 <div className="flex items-center gap-6">
                     <Link to="/my-appointments" className={navLink}>Mis Citas</Link>
+                    {/* 5. AÑADIR ENLACE AL HISTORIAL (IDEA 3) */}
+                    <Link to="/my-journal" className={navLink}>Mi Diario</Link>
                     <Link to="/my-documents" className={navLink}>Mis Documentos</Link>
                     <Link to="/profile" className={navLink}>Mi Perfil</Link>
                     <button onClick={handleLogout} className={btnDestructive}>Cerrar Sesión</button>
@@ -196,9 +240,9 @@ function AdminLayout() {
                 <Link to="/admin-dashboard" className="text-xl font-bold">Panel de Administrador</Link>
                 <div className="flex items-center gap-6">
                     <Link to="/admin-dashboard" className={navLink}>Dashboard</Link>
+                    <Link to="/admin-dashboard/validate" className={navLink}>Validaciones</Link>
                     <Link to="/admin-dashboard/backups" className={navLink}>Copias de Seguridad</Link>
                     <Link to="/admin-dashboard/audit-log" className={navLink}>Bitácora</Link>
-                    {/* Enlaces futuros: Clínicas, Estadísticas, Configuración */}
                     <button onClick={handleLogout} className={btnDestructive}>Cerrar Sesión</button>
                 </div>
             </nav>
@@ -227,7 +271,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        {/* ... (Todas tus rutas se quedan igual) ... */}
         {/* --- Rutas Públicas --- */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/home" element={<HomePage />} />
@@ -242,11 +285,23 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route element={<ProtectedRoute userType="patient"><DashboardLayout /></ProtectedRoute>}>
           <Route path="dashboard" element={<ProfessionalsPage />} />
           <Route path="my-appointments" element={<MyAppointmentsPage />} />
+          {/* 6. AÑADIR RUTA PARA EL HISTORIAL (IDEA 3) */}
+          <Route path="my-journal" element={<MoodJournalHistoryPage />} />
           <Route path="my-documents" element={<MyDocumentsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="professional/:id" element={<ProfessionalDetailPage />} />
           <Route path="chat/:appointmentId" element={<ChatPage />} />
         </Route>
+        
+        {/* --- Ruta de Triaje (Existente) --- */}
+        <Route 
+          path="/triage" 
+          element={
+            <ProtectedRoute userType="patient">
+              <TriagePage />
+            </ProtectedRoute>
+          } 
+        />
         
         {/* --- Rutas Protegidas para el Psicólogo --- */}
         <Route element={<ProtectedRoute userType="professional"><PsychologistLayout /></ProtectedRoute>}>
@@ -272,10 +327,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="admin-dashboard" element={<AdminDashboardPage />} />
           <Route path="admin/user/:userId" element={<UserProfilePage />} />
           <Route path="admin/professional-profile/:userId" element={<ProfessionalProfileDetailPage />} />
+          <Route path="admin-dashboard/validate" element={<h1 className="text-2xl font-bold text-purple-800">🚧 Página de Validación (WIP)</h1>} />
           <Route path="admin-dashboard/backups" element={<BackupsPage />} />
           <Route path="admin-dashboard/audit-log" element={<AuditLogPage />} />
-          {/* Próximamente más funcionalidades de admin de clínica */}
-        </Route>        <Route path="*" element={<Navigate to="/" />} />
+        </Route>        
+        
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       
       {/* Chatbot flotante - Disponible en todas las páginas */}

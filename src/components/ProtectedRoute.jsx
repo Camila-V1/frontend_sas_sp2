@@ -1,48 +1,65 @@
 // src/components/ProtectedRoute.jsx
 
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 function ProtectedRoute({ children, userType }) {
     const token = localStorage.getItem('authToken');
     const storedUserType = localStorage.getItem('userType');
-
-    // DEBUG: Agregar logs para entender qué está pasando
-    console.log('🔒 ProtectedRoute Debug:');
-    console.log('- Token:', token ? 'Existe' : 'NO EXISTE');
-    console.log('- Stored User Type:', storedUserType);
-    console.log('- Required User Type:', userType);
-    console.log('- URL:', window.location.pathname);
+    
+    // Obtenemos el objeto 'user' completo
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    // Necesitamos saber en qué página estamos
+    const location = useLocation();
 
     // 1. Si no hay token, siempre se redirige a login.
     if (!token) {
-        console.log('❌ Sin token -> Redirigiendo a /login');
         return <Navigate to="/login" replace />;
     }
 
     // 2. Si no se requiere un tipo específico, permitir acceso
     if (!userType) {
-        console.log('✅ Sin restricción de tipo de usuario');
         return children;
     }
 
     // 3. Verificar permisos por tipo de usuario
     const hasAccess = (() => {
-        // Admin y superuser pueden acceder a rutas de admin
         if (userType === 'admin') {
             return storedUserType === 'admin' || storedUserType === 'superuser';
         }
-        
-        // Para otros tipos, debe coincidir exactamente
         return userType === storedUserType;
     })();
 
-    if (hasAccess) {
-        console.log('✅ Acceso concedido');
-        return children;
-    } else {
-        console.log('❌ Acceso denegado -> Redirigiendo a /');
+    if (!hasAccess) {
+        // Si no tiene el rol correcto, fuera.
         return <Navigate to="/" replace />;
     }
+
+    // --- 4. LÓGICA DE TRIAJE (SOLO PARA PACIENTES) ---
+    if (storedUserType === 'patient') {
+        
+        // Obtenemos el estado del triaje desde el backend (guardado en login)
+        // y desde localStorage (si lo acaba de completar)
+        const hasCompletedTriage = user?.has_completed_triage;
+        const localTriageFlag = localStorage.getItem('triageCompleted');
+        const needsTriage = !hasCompletedTriage && !localTriageFlag;
+
+        // Si necesita triaje Y NO está ya en la página de triaje, lo forzamos a ir.
+        if (needsTriage && location.pathname !== '/triage') {
+            console.log('Paciente sin triaje. Redirigiendo a /triage...');
+            return <Navigate to="/triage" replace />;
+        }
+        
+        // Si YA completó el triaje pero intenta volver a la página /triage,
+        // lo mandamos al dashboard.
+        if (!needsTriage && location.pathname === '/triage') {
+            console.log('Triaje ya completado. Redirigiendo a /dashboard...');
+            return <Navigate to="/dashboard" replace />;
+        }
+    }
+
+    // 5. Si todas las verificaciones pasan, muestra la página solicitada.
+    return children;
 }
 
 export default ProtectedRoute;

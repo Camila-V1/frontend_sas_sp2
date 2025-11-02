@@ -93,28 +93,35 @@ export const getCurrentTenant = () => {
 // Función helper más descriptiva (alias de getCurrentTenant)
 export const getCurrentTenantConfig = getCurrentTenant;
 
+// src/config/tenants.js
+
+// ... otras funciones ...
+
 // Función para obtener la URL base de la API (construcción dinámica según tenant)
 export const getApiBaseURL = () => {
     const tenant = getTenantFromHostname();
     const hostname = window.location.hostname;
 
-    //  Dominio raíz  Backend público
+    const isLocalDevelopment = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+
+    // 1. Dominio Raíz / Admin Global
     if (!tenant) {
-        if (hostname.includes('localhost')) {
+        if (isLocalDevelopment) {
+            // Admin global usa http://localhost:8000
             return 'http://localhost:8000/api';
         }
         return 'https://psico-admin.onrender.com/api';
     }
 
-    //  Tenant específico  Backend del tenant
-    
-    // Desarrollo local
-    if (hostname.includes('localhost')) {
+    // 2. Tenant específico (¡USAR URL LOCAL CORRECTA!)
+    if (isLocalDevelopment) {
+        // CORRECCIÓN: Usamos el subdominio local (bienestar.localhost) y el puerto 8000.
+        // Esto garantiza que el Host header enviado sea "bienestar.localhost:8000".
+        // La detección del tenant ocurrirá en el backend por el subdominio `bienestar`.
         return `http://${tenant}.localhost:8000/api`;
     }
 
-    // Producción: quitar -app del hostname si existe
-    // bienestar-app.psicoadmin.xyz -> bienestar.psicoadmin.xyz
+    // 3. Producción (lógica original)
     if (hostname.includes('-app.psicoadmin.xyz')) {
         const backendHost = hostname.replace('-app', '');
         return `https://${backendHost}/api`;

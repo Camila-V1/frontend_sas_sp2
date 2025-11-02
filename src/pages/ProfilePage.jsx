@@ -3,14 +3,19 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../api';
 import { toast } from 'sonner';
-import { User, Save, X, Phone, Mail, MapPin, Calendar, Edit } from 'lucide-react';
+// AÑADIMOS NUEVOS ICONOS
+import { User, Save, X, Phone, Mail, MapPin, Calendar, Edit, ClipboardList, MessageSquare } from 'lucide-react';
 
 // --- Constantes de Estilo ---
 const btnPrimary = "px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors text-sm text-center";
+// ... (resto de tus constantes)
+// ... (resto de tus componentes ProfileInput y ProfileField)
+// --- Constantes de Estilo ---
 const btnOutline = "px-4 py-2 bg-transparent border border-border text-foreground rounded-lg font-semibold hover:bg-muted transition-colors";
 
 // --- Componente de Input (para modo edición) ---
 function ProfileInput({ label, name, value, onChange, disabled = false, type = "text" }) {
+// ... (código existente sin cambios)
   return (
     <div>
       <label htmlFor={name} className="block text-sm font-medium text-foreground mb-1">{label}</label>
@@ -29,6 +34,7 @@ function ProfileInput({ label, name, value, onChange, disabled = false, type = "
 
 // --- Componente de Campo (para modo lectura) ---
 function ProfileField({ label, value, icon: Icon }) {
+// ... (código existente sin cambios)
   return (
     <div>
       <label className="text-sm font-medium text-primary">{label}</label>
@@ -42,12 +48,16 @@ function ProfileField({ label, value, icon: Icon }) {
 
 function ProfilePage() {
     const [profileData, setProfileData] = useState(null);
+// ... (código existente de estados)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isEditing, setIsEditing] = useState(false); // <-- Estado de edición (como en la plantilla)
 
     // --- Carga de Datos ---
     const fetchProfile = async () => {
+// ... (código existente de fetchProfile)
+// ... (código existente de fetchProfile)
+// ... (código existente de fetchProfile)
         try {
             const response = await apiClient.get('/users/profile/');
             setProfileData(response.data);
@@ -60,12 +70,16 @@ function ProfilePage() {
     };
 
     useEffect(() => {
+// ... (código existente de useEffect)
         fetchProfile();
     }, []);
 
     // --- Manejador de Cambios (¡NUEVO!) ---
     // Maneja los cambios en los datos del usuario Y en el perfil del paciente anidado
     const handleChange = (e) => {
+// ... (código existente de handleChange)
+// ... (código existente de handleChange)
+// ... (código existente de handleChange)
         const { name, value } = e.target;
         
         // Verifica si el campo pertenece al perfil de paciente
@@ -90,6 +104,9 @@ function ProfilePage() {
     // Ahora usa el endpoint correcto del backend (/complete-profile/)
     // y envía los datos en el formato anidado que el backend espera.
     const handleSubmit = async (e) => {
+// ... (código existente de handleSubmit)
+// ... (código existente de handleSubmit)
+// ... (código existente de handleSubmit)
         e.preventDefault();
         try {
             // Preparamos los datos en el formato { user_data: {...}, patient_data: {...} }
@@ -119,11 +136,13 @@ function ProfilePage() {
     
     // --- Cancelar Edición ---
     const handleCancel = () => {
+// ... (código existente de handleCancel)
         setIsEditing(false);
         fetchProfile(); // Restaura los datos originales
     }
 
     if (loading) return <p className="text-center text-muted-foreground">Cargando tu perfil...</p>;
+// ... (código existente de loading/error)
     if (error) return <p className="text-center text-destructive">{error}</p>;
     if (!profileData) return null;
 
@@ -131,6 +150,7 @@ function ProfilePage() {
     return (
         <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
+
                 <h1 className="text-3xl font-bold text-primary">Mi Perfil</h1>
                 {!isEditing ? (
                   <button onClick={() => setIsEditing(true)} className={`${btnPrimary} flex items-center gap-2`}>
@@ -232,6 +252,35 @@ function ProfilePage() {
                     </div>
                 </form>
             </div>
+
+            {/* --- INICIO DE LA NUEVA SECCIÓN --- */}
+            {/* Solo mostrar si NO estamos editando Y si existe un pre_diagnosis */}
+            {!isEditing && profileData.patient_profile?.pre_diagnosis && (
+                <div className="bg-card text-card-foreground p-6 rounded-xl shadow-lg border border-border mt-6">
+                    <h2 className="text-xl font-semibold text-primary mb-6 flex items-center gap-2">
+                        <ClipboardList className="h-5 w-5" />
+                        <span>Resumen de Bienestar (Triaje Inicial)</span>
+                    </h2>
+
+                    <div className="space-y-6">
+                        <ProfileField 
+                            label="Pre-diagnóstico" 
+                            value={profileData.patient_profile.pre_diagnosis} 
+                            icon={ClipboardList} // Reutilizamos el icono
+                        />
+                        <ProfileField 
+                            label="Recomendación" 
+                            value={profileData.patient_profile.recommendation} 
+                            icon={MessageSquare}
+                        />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-6 pt-4 border-t border-border">
+                        Este es un resumen basado en tus respuestas iniciales al registrarte. No es un diagnóstico definitivo y tu profesional asignado realizará una evaluación completa.
+                    </p>
+                </div>
+            )}
+            {/* --- FIN DE LA NUEVA SECCIÓN --- */}
+
         </div>
     );
 }

@@ -3,13 +3,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import apiClient from '../api';
 import Modal from '../components/Modal'; // Tu Modal refactorizado
+import ReferralModal from '../components/ReferralModal'; // <-- IMPORTAR EL NUEVO MODAL
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify'; // Para notificaciones
+import { CornerUpRight } from 'lucide-react'; // <-- IMPORTAR NUEVO ICONO
 
 // --- Constantes de Clases de Tailwind ---
 const btnPrimary = "px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors text-sm";
 const btnSecondary = "px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:bg-secondary/90 transition-colors text-sm";
 const btnGhost = "px-4 py-2 bg-transparent border border-secondary text-secondary rounded-lg font-semibold hover:bg-secondary/10 transition-colors";
+// Nuevo estilo para el botón de derivar
+const btnWarning = "px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition-colors text-sm flex items-center gap-1";
+
 
 // Helper para las "pills" de estado
 const getPillClasses = (status) => {
@@ -23,7 +28,7 @@ const getPillClasses = (status) => {
 };
 
 function PsychologistDashboard() {
-  // ---- Tu lógica de estado (no cambia) ----
+  // ---- Estados existentes ----
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [meetingLink, setMeetingLink] = useState('');
@@ -32,12 +37,14 @@ function PsychologistDashboard() {
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
-  
-  // Nuevo estado para el modal de confirmación
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [appointmentToComplete, setAppointmentToComplete] = useState(null);
 
-  const fetchAppointments = async () => { /* ...tu función no cambia... */ 
+  // --- NUEVOS ESTADOS PARA DERIVACIÓN ---
+  const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
+  const [appointmentToRefer, setAppointmentToRefer] = useState(null);
+
+  const fetchAppointments = async () => {
     try {
       const response = await apiClient.get('/appointments/appointments/');
       setAppointments(response.data.results);
@@ -48,17 +55,19 @@ function PsychologistDashboard() {
     }
   };
   useEffect(() => { fetchAppointments(); }, []);
-  const handleOpenModal = (appointment) => { /* ...tu función no cambia... */ 
+
+  // --- Lógica de modales existentes ---
+  const handleOpenModal = (appointment) => {
     setSelectedAppt(appointment);
     setMeetingLink(appointment.meeting_link || '');
     setIsModalOpen(true);
   };
-  const handleCloseModal = () => { /* ...tu función no cambia... */ 
+  const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedAppt(null);
     setMeetingLink('');
   };
-  const handleLinkSubmit = async (e) => { /* ...tu función no cambia... */ 
+  const handleLinkSubmit = async (e) => {
     e.preventDefault();
     if (!selectedAppt) return;
     try {
@@ -72,53 +81,61 @@ function PsychologistDashboard() {
       toast.error('No se pudo guardar el enlace.');
     }
   };
-
-  // Función para abrir el modal de confirmación
   const handleOpenCompleteModal = (appointment) => {
     setAppointmentToComplete(appointment);
     setIsCompleteModalOpen(true);
   };
-
-  // Función para completar una cita (sin window.confirm)
   const handleCompleteAppointment = async () => {
     if (!appointmentToComplete) return;
-    
     try {
       await apiClient.post(`/appointments/appointments/${appointmentToComplete.id}/complete/`);
       toast.success("¡Cita marcada como completada! El paciente ahora puede calificarla.");
-      fetchAppointments(); // Refresca la lista de citas
+      fetchAppointments();
       setIsCompleteModalOpen(false);
       setAppointmentToComplete(null);
     } catch (error) {
-      console.error('Error al completar la cita:', error);
-      const errorMessage = error.response?.data?.detail || 
-                         error.response?.data?.error || 
-                         "No se pudo completar la cita.";
+      const errorMessage = error.response?.data?.detail || "No se pudo completar la cita.";
       toast.error(errorMessage);
     }
   };
-
-  // Función para cerrar el modal de confirmación
   const handleCancelComplete = () => {
     setIsCompleteModalOpen(false);
     setAppointmentToComplete(null);
   };
-  const getInitials = (fullName = '') => { /* ...tu función no cambia... */ 
+  
+  // --- NUEVAS FUNCIONES PARA EL MODAL DE DERIVACIÓN ---
+  const handleOpenReferralModal = (appointment) => {
+    setAppointmentToRefer(appointment);
+    setIsReferralModalOpen(true);
+  };
+
+  const handleCloseReferralModal = (didRefer = false) => {
+    setIsReferralModalOpen(false);
+    setAppointmentToRefer(null);
+    if (didRefer) {
+      // Si la derivación fue exitosa (el modal devuelve true)
+      // refrescamos la lista de citas.
+      fetchAppointments();
+    }
+  };
+
+  // --- Resto de la lógica (sin cambios) ---
+  const getInitials = (fullName = '') => {
     const parts = fullName.trim().split(/\s+/);
     const first = parts[0]?.[0] || '';
     const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
     return (first + last).toUpperCase();
   };
-  const groupByDateLabel = (list) => { /* ...tu función no cambia... */ 
+  const groupByDateLabel = (list) => {
     const groups = {};
     for (const a of list) {
-      const label = a.appointment_date; // YYYY-MM-DD
+      const label = a.appointment_date;
       if (!groups[label]) groups[label] = [];
       groups[label].push(a);
     }
     return Object.entries(groups).sort((a, b) => (a[0] < b[0] ? 1 : -1));
   };
-  const filteredAppointments = useMemo(() => { /* ...tu función no cambia... */ 
+  const filteredAppointments = useMemo(() => {
     return appointments
       .filter(a => (statusFilter === 'all' ? true : a.status === statusFilter))
       .filter(a => {
@@ -129,7 +146,7 @@ function PsychologistDashboard() {
           || (a.start_time || '').toLowerCase().includes(q);
       });
   }, [appointments, statusFilter, query]);
-  const stats = useMemo(() => { /* ...tu función no cambia... */ 
+  const stats = useMemo(() => {
     const total = appointments.length;
     const by = (s) => appointments.filter(a => a.status === s).length;
     return {
@@ -144,7 +161,6 @@ function PsychologistDashboard() {
   if (loading) return <p className="text-center text-muted-foreground">Cargando tus citas...</p>;
   if (error) return <p className="text-center text-destructive">{error}</p>;
 
-  // --- AHORA VIENE EL JSX REFACTORIZADO ---
   return (
     <>
       <div className="max-w-7xl mx-auto">
@@ -258,7 +274,19 @@ function PsychologistDashboard() {
                         </div>
                       </div>
 
-                      <footer className="flex gap-2 justify-end mt-auto">
+                      <footer className="flex flex-wrap gap-2 justify-end mt-auto">
+                        {/* --- BOTÓN DE DERIVAR --- */}
+                        {(appt.status === 'pending' || appt.status === 'confirmed') && (
+                            <button 
+                              onClick={() => handleOpenReferralModal(appt)} 
+                              className={btnWarning}
+                              title="Derivar esta cita a otro colega"
+                            >
+                                <CornerUpRight className="h-4 w-4" /> Derivar
+                            </button>
+                        )}
+                        
+                        {/* Botones existentes */}
                         <button onClick={() => handleOpenModal(appt)} className={btnPrimary}>
                           {appt.meeting_link ? 'Editar enlace' : 'Añadir enlace'}
                         </button>
@@ -294,6 +322,8 @@ function PsychologistDashboard() {
           )}
         </section>
       </div>
+
+      {/* --- MODALES AL FINAL --- */}
 
       {/* Modal para enlace */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
@@ -366,6 +396,13 @@ function PsychologistDashboard() {
           </div>
         </div>
       </Modal>
+
+      {/* Modal de Derivación (NUEVO) */}
+      <ReferralModal
+        isOpen={isReferralModalOpen}
+        onClose={handleCloseReferralModal}
+        appointment={appointmentToRefer}
+      />
     </>
   );
 }

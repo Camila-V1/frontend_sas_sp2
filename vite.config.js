@@ -12,5 +12,10 @@ export default defineConfig({
       host: 'localhost',
       protocol: 'ws',
     },
+    allowedHosts: [
+      'psicoadmin.xyz',
+      'bienestar.psicoadmin.xyz',
+      'mindcare.psicoadmin.xyz'
+    ]
   },
 })

@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../api';
+import { toast } from 'react-toastify'; // <-- Asegúrate de importar toast
+import { Loader, CheckCircle, XCircle } from 'lucide-react'; // <-- Iconos mejorados
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
@@ -21,43 +23,46 @@ const PaymentSuccessPage = () => {
       }
 
       try {
-        // Como llegamos aquí desde Stripe, asumimos que el pago fue exitoso
-        // El webhook ya habrá confirmado el pago en el backend
-        console.log('Pago exitoso confirmado por Stripe:', sessionId);
+        // --- ¡ESTA ES LA CORRECCIÓN! ---
+        // 1. Llamamos al endpoint correcto del backend para confirmar el pago
+        //    y crear la transacción.
+        console.log('Confirmando sesión de pago con el backend:', sessionId);
+        toast.info('Verificando tu pago, por favor espera...');
         
-        // Simular datos de cita exitosa
-        setAppointmentDetails({
-          date: new Date().toISOString().split('T')[0],
-          time: '10:00',
-          psychologist_name: 'Psicólogo Asignado',
-          price: 150,
-          status: 'confirmed',
+        const response = await apiClient.post('/payments/confirm-payment/', {
           session_id: sessionId
         });
-        
+
+        // 2. Usamos la respuesta REAL del backend
+        //    (Asumiendo que el backend devuelve la cita confirmada)
+        setAppointmentDetails(response.data.appointment || response.data);
         setVerifying(false);
-        
-        // Redirigir automáticamente después de 3 segundos
+        toast.success("¡Pago confirmado! Tu cita está agendada.");
+
+        // 3. Redirigir automáticamente a "Mis Citas"
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/my-appointments');
         }, 3000);
         
       } catch (err) {
         console.error('Error procesando confirmación:', err);
-        setError('Error confirmando la cita');
+        const errorMsg = err.response?.data?.error || 'Error al confirmar la cita. Por favor, contacta a soporte.';
+        setError(errorMsg);
+        toast.error(errorMsg);
         setVerifying(false);
       }
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   if (verifying) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando pago...</p>
+          <Loader className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" />
+          <h1 className="text-xl font-semibold text-gray-700">Verificando tu pago...</h1>
+          <p className="text-gray-500">Por favor, no cierres esta ventana.</p>
         </div>
       </div>
     );
@@ -67,15 +72,11 @@ const PaymentSuccessPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Error de Verificación</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/my-appointments')}
             className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg"
           >
             Ver Mis Citas
@@ -88,11 +89,7 @@ const PaymentSuccessPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
+        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
         
         <h1 className="text-2xl font-bold text-gray-900 mb-2">¡Pago Exitoso!</h1>
         <p className="text-gray-600 mb-6">Tu cita ha sido confirmada y pagada exitosamente.</p>
@@ -101,10 +98,9 @@ const PaymentSuccessPage = () => {
           <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
             <h3 className="font-semibold text-gray-900 mb-2">Detalles de la Cita:</h3>
             <div className="space-y-1 text-sm text-gray-600">
-              <p><span className="font-medium">Fecha:</span> {new Date(appointmentDetails.date).toLocaleDateString()}</p>
-              <p><span className="font-medium">Hora:</span> {appointmentDetails.time}</p>
+              <p><span className="font-medium">Fecha:</span> {new Date(appointmentDetails.appointment_date).toLocaleDateString()}</p>
+              <p><span className="font-medium">Hora:</span> {appointmentDetails.start_time}</p>
               <p><span className="font-medium">Psicólogo:</span> {appointmentDetails.psychologist_name}</p>
-              <p><span className="font-medium">Precio:</span> ${appointmentDetails.price}</p>
               <p><span className="font-medium">Estado:</span> 
                 <span className="ml-1 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
                   Confirmada
@@ -114,20 +110,16 @@ const PaymentSuccessPage = () => {
           </div>
         )}
         
-        <div className="space-y-3">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
-          >
-            Ver Mis Citas
-          </button>
-          <button
-            onClick={() => navigate('/professionals')}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg"
-          >
-            Buscar Más Profesionales
-          </button>
-        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Serás redirigido a "Mis Citas" en 3 segundos...
+        </p>
+
+        <button
+          onClick={() => navigate('/my-appointments')}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
+        >
+          Ir a Mis Citas Ahora
+        </button>
       </div>
     </div>
   );
